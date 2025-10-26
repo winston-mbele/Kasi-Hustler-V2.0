@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Applicants - Kasi Hustle</title>
+    <!-- Link Global Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Specific Styles for Applicants Page */
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color); /* Ensure body uses theme background */
+        }
+
+        .applicants-page {
+            padding: 40px 0;
+            min-height: 80vh; /* Ensure content pushes footer down */
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .page-header .job-title-display {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .applicants-list-container {
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden; /* Ensures border-radius applies to content */
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--background-color); /* Slightly different background for header */
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        /* UPDATED: Adjusted flex-basis for new layout */
+        .list-header .applicant-name { flex-basis: 30%; }
+        .list-header .applicant-location { flex-basis: 20%; text-align: left; } /* New location column */
+        .list-header .applied-date { flex-basis: 20%; text-align: center;}
+        .list-header .applicant-status { flex-basis: 15%; text-align: center;} /* Reduced status width */
+        .list-header .applicant-actions { flex-basis: 15%; text-align: right; }
+
+
+        .applicant-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s;
+        }
+
+        .applicant-card:last-child {
+            border-bottom: none;
+        }
+
+        .applicant-card:hover {
+            background-color: var(--background-color);
+        }
+
+        /* UPDATED: Adjusted flex-basis */
+        .applicant-card .applicant-name {
+            font-weight: 600;
+            color: var(--text-color);
+            flex-basis: 30%;
+        }
+
+        /* NEW: Location column styles */
+        .applicant-card .applicant-location {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            flex-basis: 20%;
+            text-align: left; /* Aligns with header */
+        }
+        
+        /* UPDATED: Adjusted flex-basis */
+        .applicant-card .applied-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            flex-basis: 20%;
+            text-align: center;
+        }
+
+        /* UPDATED: Adjusted flex-basis */
+        .applicant-card .applicant-status {
+            font-size: 0.9rem;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 500;
+            text-align: center;
+            flex-basis: 15%; /* Reduced status width */
+            /* Ensure text doesn't wrap excessively */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block; /* Helps with alignment */
+            vertical-align: middle; /* Aligns vertically if needed */
+        }
+        /* Status Colors (Example) */
+        .status-new { background-color: #e0f2fe; color: #3b82f6; } /* Blue */
+        .status-reviewing { background-color: #fef3c7; color: #f59e0b; } /* Yellow */
+        .status-contacted { background-color: #d1fae5; color: #059669; } /* Green */
+        .status-rejected { background-color: #fee2e2; color: #dc2626; } /* Red */
+
+        /* UPDATED: Adjusted flex-basis */
+        .applicant-card .applicant-actions {
+            flex-basis: 15%;
+            text-align: right;
+        }
+        .applicant-card .applicant-actions .btn-secondary {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        #loading-state, #no-applicants-state {
+             text-align: center;
+             padding: 40px;
+             color: var(--text-light);
+             font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .list-header { display: none; } /* Hide header on mobile */
+            .applicant-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .applicant-card > div { /* Target direct children divs */
+                 flex-basis: auto;
+                 width: 100%;
+                 text-align: left !important; /* Override center align */
+            }
+             /* NEW: Ensure location shows on mobile */
+            .applicant-card .applicant-location {
+                order: 1; /* Place location after name on mobile */
+            }
+            .applicant-card .applied-date {
+                 order: 2;
+            }
+            .applicant-card .applicant-status {
+                 display: inline-block; /* Make status tag inline */
+                 width: auto;
+                 order: 3;
+            }
+            .applicant-card .applicant-actions {
+                 text-align: left !important; /* Override right align */
+                 padding-top: 10px;
+                 border-top: 1px dashed var(--border-color);
+                 margin-top: 10px;
+                 order: 4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="business-profile.html" class="nav-link">Dashboard</a>
+                <div id="auth-container" class="waiting-auth">
+                    <!-- Auth status injected by auth-status.js -->
+                </div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <main class="applicants-page">
+        <div class="container">
+            <div class="page-header">
+                 <a href="business-profile.html" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                 <h1>Applicants for: <span id="job-title-display" class="job-title-display">Loading Job...</span></h1>
+            </div>
+
+            <div id="loading-state">
+                <i class="fas fa-spinner fa-spin"></i> Loading applicants...
+            </div>
+
+             <div id="no-applicants-state" style="display: none;">
+                <p><i class="fas fa-info-circle"></i> No applicants found for this job posting yet.</p>
+            </div>
+
+
+            <div class="applicants-list-container" id="applicants-list-container" style="display: none;">
+                <div class="list-header">
+                    <div class="applicant-name">Name</div>
+                    <div class="applicant-location">Location</div> <!-- NEW -->
+                    <div class="applied-date">Applied On</div>
+                    <div class="applicant-status">Status</div>
+                    <div class="applicant-actions">Actions</div>
+                </div>
+                <div id="applicants-list">
+                    <!-- Applicant cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 Kasi Hustle. All rights reserved.</p></div></div>
+    </footer>
+
+    <!-- Link Global Scripts -->
+    <script src="theme.js"></script>
+    <script type="module" src="auth-status.js"></script>
+    <script type="module">
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
+
+        const jobTitleDisplay = document.getElementById('job-title-display');
+        const applicantsListDiv = document.getElementById('applicants-list');
+        const loadingState = document.getElementById('loading-state');
+        const noApplicantsState = document.getElementById('no-applicants-state');
+        const listContainer = document.getElementById('applicants-list-container');
+
+        let currentUserId = null;
+        let currentJobId = null;
+
+        // Function to parse URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Function to fetch job details and applicants
+        async function fetchJobAndApplicants() {
+            if (!currentUserId || !currentJobId) {
+                console.error("User ID or Job ID is missing.");
+                loadingState.textContent = "Error: Could not load job details.";
+                noApplicantsState.style.display = 'none';
+                listContainer.style.display = 'none';
+                return;
+            }
+
+            try {
+                // 1. Fetch Job Details
+                const jobDocRef = doc(db, "users", currentUserId, "jobs", currentJobId);
+                const jobDocSnap = await getDoc(jobDocRef);
+
+                if (!jobDocSnap.exists()) {
+                    jobTitleDisplay.textContent = "Job Not Found";
+                    throw new Error("Job document not found.");
+                }
+
+                const jobData = jobDocSnap.data();
+                jobTitleDisplay.textContent = jobData.title || "Unknown Job";
+
+                // 2. Fetch Applicants (Conceptual - requires 'applicants' subcollection)
+                console.log("Fetching applicants for Job ID:", currentJobId);
+
+                // --- MOCK APPLICANT RENDERING (UPDATED with location) ---
+                 const mockApplicants = [
+                     { id: 'app1', name: 'Sipho Mkhize', location: 'Soshanguve Block L', appliedDate: '2025-10-24', status: 'New' },
+                     { id: 'app2', name: 'Zandile Dube', location: 'Mamelodi East', appliedDate: '2025-10-23', status: 'Reviewing' },
+                     { id: 'app3', name: 'Bongani Zulu', location: 'Atteridgeville', appliedDate: '2025-10-22', status: 'Contacted' },
+                     { id: 'app4', name: 'Lerato Nkosi', location: 'Ga-Rankuwa Zone 1', appliedDate: '2025-10-21', status: 'Rejected' },
+                 ];
+
+                renderApplicants(mockApplicants); // Use mock data for now
+                // --- END MOCK ---
+
+                /* --- EXAMPLE FIRESTORE QUERY (Uncomment when 'applicants' collection exists) ---
+                // Assumes applicant document has fields like 'applicantName', 'applicantLocation', 'applicationDate', 'status'
+                const applicantsColRef = collection(db, "users", currentUserId, "jobs", currentJobId, "applicants");
+                const q = query(applicantsColRef); // Add orderBy('applicationDate', 'desc') if needed
+                const querySnapshot = await getDocs(q);
+
+                const applicants = [];
+                querySnapshot.forEach((doc) => {
+                    applicants.push({
+                        id: doc.id,
+                        name: doc.data().applicantName, // Adjust field names as needed
+                        location: doc.data().applicantLocation,
+                        appliedDate: doc.data().applicationDate?.toDate ? doc.data().applicationDate.toDate().toISOString() : new Date().toISOString(), // Handle potential Firestore Timestamp
+                        status: doc.data().status
+                     });
+                });
+
+                renderApplicants(applicants);
+                */
+
+
+            } catch (error) {
+                console.error("Error fetching job/applicants:", error);
+                loadingState.textContent = "Error loading applicants.";
+                noApplicantsState.style.display = 'none';
+                listContainer.style.display = 'none';
+            }
+        }
+
+        // Function to render the list of applicants
+        function renderApplicants(applicants) {
+            applicantsListDiv.innerHTML = ''; // Clear previous list
+            loadingState.style.display = 'none'; // Hide loading spinner
+
+            if (!applicants || applicants.length === 0) {
+                noApplicantsState.style.display = 'block';
+                listContainer.style.display = 'none';
+                return;
+            }
+
+            noApplicantsState.style.display = 'none';
+            listContainer.style.display = 'block';
+
+
+            applicants.forEach(applicant => {
+                const card = document.createElement('div');
+                card.className = 'applicant-card';
+
+                // Format date nicely (adjust locale as needed)
+                let appliedDateStr = 'Unknown Date';
+                try {
+                    appliedDateStr = new Date(applicant.appliedDate).toLocaleDateString('en-ZA', {
+                         year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                } catch (e) { console.warn("Could not parse date:", applicant.appliedDate); }
+
+
+                // Determine status class
+                let statusClass = '';
+                switch (applicant.status?.toLowerCase()) {
+                    case 'new': statusClass = 'status-new'; break;
+                    case 'reviewing': statusClass = 'status-reviewing'; break;
+                    case 'contacted': statusClass = 'status-contacted'; break;
+                    case 'rejected': statusClass = 'status-rejected'; break;
+                    default: statusClass = 'status-new'; // Default if status is missing
+                }
+
+                // UPDATED: Added applicant-location div
+                card.innerHTML = `
+                    <div class="applicant-name">${applicant.name || 'Unknown Applicant'}</div>
+                    <div class="applicant-location">${applicant.location || 'N/A'}</div>
+                    <div class="applied-date">${appliedDateStr}</div>
+                    <div class="applicant-status ${statusClass}">${applicant.status || 'New'}</div>
+                    <div class="applicant-actions">
+                        <button class="btn-secondary view-applicant-btn" data-applicant-id="${applicant.id}">
+                           <i class="fas fa-eye"></i> View
+                        </button>
+                    </div>
+                `;
+                applicantsListDiv.appendChild(card);
+            });
+
+            // Add event listeners to 'View' buttons (implement view logic later)
+             applicantsListDiv.querySelectorAll('.view-applicant-btn').forEach(button => {
+                 button.addEventListener('click', (e) => {
+                     const applicantId = e.currentTarget.dataset.applicantId;
+                     console.log(`View applicant clicked: ${applicantId}. Implement viewing logic.`);
+                     // Example: window.location.href = `view-applicant-profile.html?applicantId=${applicantId}&jobId=${currentJobId}`;
+                 });
+             });
+        }
+
+        // Initial setup on Auth state change
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                currentJobId = getQueryParam('jobId'); // Get Job ID from URL
+
+                if (!currentJobId) {
+                    console.error("Job ID not found in URL.");
+                     loadingState.textContent = "Error: Job ID is missing from the URL.";
+                     noApplicantsState.style.display = 'none';
+                     listContainer.style.display = 'none';
+                    return;
+                }
+
+                // Fetch data only after confirming user and job ID
+                fetchJobAndApplicants();
+
+            } else {
+                // Not logged in, redirect to auth
+                window.location.href = "auth.html";
+            }
+        });
+
+    </script>
+</body>
+</html>
+

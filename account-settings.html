@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Specific Styles for Account Settings Page */
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+        }
+
+        .settings-page {
+            min-height: 80vh;
+        }
+        
+        /* --- NEW: Add margin-top to the main container --- */
+        main.container {
+            margin-top: 30px; /* Adjust this value (e.g., 20px, 40px) as needed */
+        }
+        /* --- END NEW --- */
+
+        /* --- FIX FOR HEADER ALIGNMENT --- */
+        .page-header {
+            display: flex;
+            align-items: center; /* Ensures vertical alignment */
+            gap: 20px; /* Increased gap slightly for better spacing */
+            margin-bottom: 30px;
+            padding-bottom: 15px; /* Keep the bottom border space */
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin: 0; /* Removed default heading margins */
+            line-height: 1.2; /* Adjust line height if needed */
+        }
+        /* --- END FIX --- */
+
+
+        .settings-section {
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .settings-section h2 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        /* Input group styling from auth page for consistency */
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--background-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+        }
+
+        /* Message display area */
+        .message-area {
+             margin-top: 15px;
+             padding: 10px;
+             border-radius: var(--border-radius);
+             display: none; /* Hidden by default */
+        }
+        .message-area.success { background-color: #d1fae5; color: #059669; }
+        .message-area.error { background-color: #fee2e2; color: #dc2626; }
+
+        /* Delete Account section specific styles */
+        #delete-account-section p {
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+        #delete-account-btn {
+             background-color: var(--primary-color);
+             color: #fff;
+        }
+        #delete-account-btn:hover {
+             background-color: var(--primary-hover);
+        }
+
+         /* --- Confirmation Modal Styles --- */
+         .modal {
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 450px; /* Smaller width for confirmation */
+            box-shadow: var(--shadow-md);
+            position: relative;
+            text-align: center;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
+
+        .modal.open .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-content h2 { color: var(--primary-color); margin-top: 0; }
+        .modal-content p { color: var(--text-light); margin-bottom: 25px; }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body class="settings-page">
+     <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="all-services.html" class="nav-link">Find Services</a>
+                <div id="auth-container" class="waiting-auth">
+                    <!-- Auth status injected by auth-status.js -->
+                </div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+             <!-- Dynamically determine back link based on role -->
+            <a href="#" id="back-link" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <h1>Account Settings</h1>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="settings-section">
+            <h2><i class="fas fa-lock"></i> Change Password</h2>
+            <p style="color: var(--text-light); margin-bottom: 15px;">Your current email is: <strong id="user-email-display">Loading...</strong></p>
+            <button id="reset-password-btn" class="btn-primary"><i class="fas fa-key"></i> Send Password Reset Email</button>
+            <div id="reset-message" class="message-area"></div>
+        </div>
+
+        <!-- Update Email Section (Placeholder) -->
+        <div class="settings-section">
+            <h2><i class="fas fa-envelope"></i> Update Email Address</h2>
+            <p style="color: var(--text-light);">Updating your email requires re-authentication for security. This feature is coming soon.</p>
+             <div class="input-group">
+                <label for="new-email">New Email Address</label>
+                <input type="email" id="new-email" placeholder="Enter your new email" disabled>
+            </div>
+            <button class="btn-secondary" disabled><i class="fas fa-save"></i> Update Email (Coming Soon)</button>
+        </div>
+
+        <!-- Notification Preferences (Placeholder) -->
+         <div class="settings-section">
+            <h2><i class="fas fa-bell"></i> Notification Preferences</h2>
+            <p style="color: var(--text-light);">Manage how you receive notifications (e.g., new messages, service requests). This feature is coming soon.</p>
+             <div class="input-group">
+                 <input type="checkbox" id="email-notifications" checked disabled>
+                 <label for="email-notifications" style="display: inline; margin-left: 10px;">Receive email notifications</label>
+             </div>
+              <button class="btn-secondary" disabled><i class="fas fa-save"></i> Save Preferences (Coming Soon)</button>
+        </div>
+
+
+        <!-- Delete Account Section -->
+        <div id="delete-account-section" class="settings-section">
+            <h2><i class="fas fa-trash-alt"></i> Delete Account</h2>
+            <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
+            <button id="delete-account-btn" class="btn-primary"><i class="fas fa-exclamation-triangle"></i> Delete My Account</button>
+            <div id="delete-message" class="message-area"></div>
+        </div>
+    </main>
+
+    <!-- Confirmation Modal (for Delete Account) -->
+    <div id="confirm-delete-modal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Account Deletion</h2>
+            <p>Are you absolutely sure you want to delete your account? All your profile data, portfolio images, and settings will be lost forever.</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancel-delete-btn"><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn-primary" id="confirm-delete-action-btn"><i class="fas fa-trash-alt"></i> Yes, Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 Kasi Hustle. All rights reserved.</p></div></div>
+    </footer>
+
+    <script src="theme.js"></script>
+    <script type="module" src="auth-status.js"></script>
+    <script type="module">
+        import { onAuthStateChanged, sendPasswordResetEmail, deleteUser } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        // Note: updateEmail requires re-authentication, so it's more complex and not implemented here.
+        import { auth } from './firebase-config.js';
+
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const resetPasswordBtn = document.getElementById('reset-password-btn');
+        const resetMessage = document.getElementById('reset-message');
+        const deleteAccountBtn = document.getElementById('delete-account-btn');
+        const deleteMessage = document.getElementById('delete-message');
+        const backLink = document.getElementById('back-link');
+
+        // Delete Confirmation Modal Elements
+        const deleteModal = document.getElementById('confirm-delete-modal');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        const confirmDeleteActionBtn = document.getElementById('confirm-delete-action-btn');
+
+        let currentUser = null;
+
+        // --- Utility to show messages ---
+        function showMessage(element, message, isError = false) {
+             element.textContent = message;
+             element.className = `message-area ${isError ? 'error' : 'success'}`;
+             element.style.display = 'block';
+             // Automatically hide after a few seconds
+             setTimeout(() => { element.style.display = 'none'; }, 5000);
+        }
+
+        // --- Modal Control ---
+         function openDeleteModal() {
+            deleteModal.classList.add('open');
+            deleteModal.style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            deleteModal.classList.remove('open');
+            setTimeout(() => {
+                deleteModal.style.display = 'none';
+            }, 300);
+        }
+
+        // --- Event Listeners ---
+        resetPasswordBtn.addEventListener('click', async () => {
+            if (!currentUser || !currentUser.email) {
+                showMessage(resetMessage, "Could not get user email. Please log in again.", true);
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, currentUser.email);
+                showMessage(resetMessage, `Password reset email sent to ${currentUser.email}. Please check your inbox.`);
+            } catch (error) {
+                console.error("Error sending password reset email:", error);
+                showMessage(resetMessage, `Failed to send reset email: ${error.message}`, true);
+            }
+        });
+
+        deleteAccountBtn.addEventListener('click', () => {
+             openDeleteModal(); // Open confirmation modal first
+        });
+
+        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+
+        confirmDeleteActionBtn.addEventListener('click', async () => {
+             closeDeleteModal(); // Close modal immediately
+             if (!currentUser) {
+                 showMessage(deleteMessage, "Cannot delete account. User not found. Please log in again.", true);
+                 return;
+             }
+
+             // Disable button to prevent multiple clicks
+             confirmDeleteActionBtn.disabled = true;
+             confirmDeleteActionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+             try {
+                await deleteUser(currentUser);
+                console.log("User account deleted successfully.");
+                // Clear local storage associated with the user (optional but good practice)
+                Object.keys(localStorage).forEach(key => {
+                     if (key.includes(currentUser.uid) || key === 'userRole' || key === 'userName') {
+                         localStorage.removeItem(key);
+                     }
+                 });
+                // Redirect to signup/login page after deletion
+                window.location.href = "auth.html?message=AccountDeleted"; // Optional message
+             } catch (error) {
+                 console.error("Error deleting user account:", error);
+                 // Check for 'requires-recent-login' error
+                 if (error.code === 'auth/requires-recent-login') {
+                      showMessage(deleteMessage, "This action requires you to have logged in recently. Please log out and log back in before deleting your account.", true);
+                 } else {
+                      showMessage(deleteMessage, `Failed to delete account: ${error.message}`, true);
+                 }
+                 // Re-enable button on failure
+                 confirmDeleteActionBtn.disabled = false;
+                 confirmDeleteActionBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Yes, Delete Account';
+
+             }
+        });
+
+
+        // --- Initial Load ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                userEmailDisplay.textContent = user.email || 'Not available';
+
+                // Set the correct back link based on stored role
+                const userRole = localStorage.getItem('userRole');
+                if (userRole === 'Service Provider') {
+                     backLink.href = 'business-profile.html';
+                } else { // Default to Personal profile
+                     backLink.href = 'myprofile.html';
+                }
+
+            } else {
+                // Not logged in, redirect
+                 window.location.href = "auth.html";
+            }
+        });
+
+    </script>
+</body>
+</html>
+

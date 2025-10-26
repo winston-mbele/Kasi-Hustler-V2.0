@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Messages - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ADDED: Ensure the body uses the correct background from CSS variables */
+        .chat-body {
+            overflow: hidden;
+            height: 100vh;
+            background-color: var(--background-color);
+            margin: 0; /* Ensure no default body margin */
+            padding: 0; /* Ensure no default body padding */
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack navbar and chat container */
+        }
+
+        /* Adjust chat container height to account for navbar */
+        .chat-container {
+            display: flex;
+            flex-grow: 1; /* Allow chat container to fill remaining height */
+            /* height: calc(100vh - 71px); */ /* Removed fixed height calculation, flex-grow handles it */
+            overflow: hidden; /* Prevent inner scrolling issues */
+        }
+
+        /* Styling for the conversations list header */
+        .conversations-list .chat-header h3 {
+             margin: 0;
+             font-size: 1.5rem;
+             color: var(--text-color);
+             padding: 20px; /* Consistent padding */
+             border-bottom: 1px solid var(--border-color); /* Match chat window header */
+        }
+
+        /* Styling for the main chat window header */
+        .chat-window .chat-header {
+             display: flex;
+             align-items: center;
+             gap: 15px;
+             padding: 15px 20px; /* Adjusted padding */
+             border-bottom: 1px solid var(--border-color);
+             background-color: var(--surface-color);
+        }
+        .chat-window .chat-header img {
+             width: 45px;
+             height: 45px;
+             border-radius: 50%;
+             object-fit: cover;
+        }
+         .chat-window .chat-header h3 {
+             margin: 0;
+             font-size: 1.1rem; /* Smaller font size for name */
+             font-weight: 600;
+         }
+
+        /* IMPROVEMENT: Apply the correct theme/color variables to messages */
+        .message-area {
+            flex-grow: 1; /* Fill available space */
+            padding: 20px;
+            overflow-y: auto; /* Allow scrolling */
+            display: flex;
+            flex-direction: column;
+            background-color: var(--background-color); /* Ensure background color */
+        }
+
+        .message {
+            max-width: 75%;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message p {
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin: 0;
+            line-height: 1.5;
+            word-wrap: break-word; /* Prevent long words from overflowing */
+        }
+         .message p.has-image {
+            padding: 5px;
+            background-color: transparent !important;
+            border: none !important;
+        }
+        .message .chat-image {
+            max-width: 100%;
+            border-radius: 15px;
+            display: block;
+            max-height: 200px;
+            cursor: pointer; /* Indicate it's clickable */
+        }
+        .message-time {
+             font-size: 0.75rem;
+             color: var(--text-light);
+             margin-top: 5px;
+        }
+
+
+        /* Customer is SENDER */
+        .message.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .message.sent p:not(.has-image) {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-bottom-right-radius: 5px;
+        }
+
+        /* Provider is RECEIVER */
+        .message.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+        .message.received p:not(.has-image) {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color); /* Ensure text color contrasts */
+            border-bottom-left-radius: 5px;
+        }
+
+        /* Input area styling */
+        .message-input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input-area input[type="text"] {
+             flex-grow: 1;
+             padding: 12px 15px;
+             border-radius: var(--border-radius);
+             border: 1px solid var(--border-color);
+             background: var(--background-color);
+             color: var(--text-color);
+             font-size: 1rem;
+             outline: none;
+        }
+         .message-input-area input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+         .chat-action-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+         #chat-upload-btn {
+            background-color: var(--surface-color);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        #chat-upload-btn:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        #chat-send-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        #chat-send-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Responsive adjustments */
+         @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+            }
+            .conversations-list {
+                width: 100%;
+                height: 250px; /* Fixed height for conversation list on mobile */
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                flex-shrink: 0; /* Prevent shrinking */
+            }
+            .chat-window {
+                flex-grow: 1; /* Allow chat window to fill remaining space */
+            }
+         }
+    </style>
+</head>
+<body class="chat-body">
+     <nav class="navbar">
+        <div class="nav-container">
+             <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="all-services.html" class="nav-link">Find Services</a>
+                <div id="auth-container" class="waiting-auth">
+                     <a href="auth.html" class="nav-link btn-auth">Sign Up / Login</a>
+                </div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+
+    <div class="chat-container">
+        <div class="conversations-list">
+            <div class="chat-header">
+                <h3>Inbox</h3>
+            </div>
+            <div class="chat-contact active" data-provider-id="thabo123" data-provider-name="Thabo Mthembu" data-provider-avatar="https://images.pexels.com/photos/5450410/pexels-photo-5450410.jpeg?auto=compress&cs=tinysrgb&w=600">
+                <img src="https://images.pexels.com/photos/5450410/pexels-photo-5450410.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Thabo Mthembu Avatar">
+                <div class="contact-details">
+                    <div class="contact-name">Thabo Mthembu (Plumber)</div>
+                    <div class="last-message">Okay, see you then!</div>
+                </div>
+                <div class="message-time">5m ago</div>
+            </div>
+            <div class="chat-contact" data-provider-id="jabu456" data-provider-name="Jabulani Sibanda" data-provider-avatar="https://images.pexels.com/photos/7218525/pexels-photo-7218525.jpeg?auto=compress&cs=tinysrgb&w=600">
+                <img src="https://images.pexels.com/photos/7218525/pexels-photo-7218525.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Jabulani Sibanda Avatar">
+                <div class="contact-details">
+                    <div class="contact-name">Jabulani Sibanda (Painter)</div>
+                    <div class="last-message">Thanks for the pictures. I'll send...</div>
+                </div>
+                <div class="message-time">1h ago</div>
+            </div>
+             <div class="chat-contact" data-provider-id="maria789" data-provider-name="Maria Sithole" data-provider-avatar="https://images.pexels.com/photos/4239031/pexels-photo-4239031.jpeg?auto=compress&cs=tinysrgb&w=600">
+                <img src="https://images.pexels.com/photos/4239031/pexels-photo-4239031.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Maria Sithole Avatar">
+                <div class="contact-details">
+                    <div class="contact-name">Maria Sithole (Cleaning)</div>
+                    <div class="last-message">Yes, I can do deep cleaning as well.</div>
+                </div>
+                <div class="message-time">Yesterday</div>
+            </div>
+             </div>
+
+        <div class="chat-window">
+            <div class="chat-header">
+                <img id="active-chat-avatar" src="https://images.pexels.com/photos/5450410/pexels-photo-5450410.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Provider Avatar">
+                <h3 id="active-chat-name">Thabo Mthembu (Plumber)</h3>
+                </div>
+            <div class="message-area" id="message-area">
+                <div class="message received">
+                    <p>Hi there! Yes, I can definitely help with that leaking pipe. Can you send me a picture of the leak?</p>
+                     <span class="message-time">Yesterday, 4:32 PM</span>
+                </div>
+                 <div class="message sent">
+                    <p>Sure, here it is.</p>
+                     <span class="message-time">Yesterday, 4:35 PM</span>
+                </div>
+                <div class="message sent">
+                     <p class="has-image">
+                        <img src="https://via.placeholder.com/300x200.png?text=Leaking+Pipe+Example" alt="Leaking Pipe" class="chat-image">
+                     </p>
+                     <span class="message-time">Yesterday, 4:35 PM</span>
+                </div>
+                 <div class="message received">
+                    <p>Thanks. Looks like a straightforward fix. I can come by tomorrow. My call-out fee is R350 which includes the first hour of labor.</p>
+                     <span class="message-time">Yesterday, 4:40 PM</span>
+                </div>
+                 <div class="message sent">
+                    <p>Sounds good, is 2 PM okay?</p>
+                     <span class="message-time">10m ago</span>
+                </div>
+                 <div class="message received">
+                    <p>Okay, see you then!</p>
+                     <span class="message-time">5m ago</span>
+                </div>
+                 </div>
+            <div class="message-input-area">
+                <input type="file" id="chat-image-input" accept="image/*" style="display: none;">
+                <button id="chat-upload-btn" class="chat-action-btn" title="Attach Image"><i class="fas fa-paperclip"></i></button>
+                <input type="text" id="chat-message-input" placeholder="Type your message...">
+                <button id="chat-send-btn" class="chat-action-btn" title="Send Message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="theme.js"></script>
+    <script type="module" src="auth-status.js"></script>
+    <script>
+        // Basic Client-Side Chat Simulation Logic (Needs Firebase integration later)
+        document.addEventListener('DOMContentLoaded', () => {
+            const conversationsList = document.querySelector('.conversations-list');
+            const chatContacts = conversationsList.querySelectorAll('.chat-contact');
+            const activeChatAvatar = document.getElementById('active-chat-avatar');
+            const activeChatName = document.getElementById('active-chat-name');
+            const messageArea = document.getElementById('message-area');
+            const messageInput = document.getElementById('chat-message-input');
+            const sendButton = document.getElementById('chat-send-btn');
+            const uploadButton = document.getElementById('chat-upload-btn');
+            const imageInput = document.getElementById('chat-image-input');
+
+            // --- Mock Function to Load Conversation ---
+            // In a real app, this would fetch messages from Firestore based on providerId
+            function loadConversation(providerName, providerAvatar) {
+                activeChatName.textContent = providerName;
+                activeChatAvatar.src = providerAvatar;
+                // Clear existing messages (except maybe keep the initial example for demo)
+                // messageArea.innerHTML = '';
+                console.log(`Switched to conversation with ${providerName}`);
+                // TODO: Fetch and render actual messages from Firestore here
+            }
+
+            // --- Handle Switching Conversations ---
+            chatContacts.forEach(contact => {
+                contact.addEventListener('click', () => {
+                    // Remove 'active' class from all contacts
+                    chatContacts.forEach(c => c.classList.remove('active'));
+                    // Add 'active' class to the clicked contact
+                    contact.classList.add('active');
+
+                    // Load the conversation data into the main window
+                    const providerName = contact.dataset.providerName || 'Unknown Provider';
+                    const providerAvatar = contact.dataset.providerAvatar || 'default-profile-picture.png';
+                    loadConversation(providerName, providerAvatar);
+                });
+            });
+
+            // --- Handle Sending Messages ---
+            function sendMessage() {
+                const messageText = messageInput.value.trim();
+                if (messageText === '') return;
+
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'sent'); // Customer messages are 'sent'
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                messageElement.innerHTML = `
+                    <p>${messageText}</p>
+                    <span class="message-time">${time}</span>
+                `;
+
+                messageArea.appendChild(messageElement);
+                messageArea.scrollTop = messageArea.scrollHeight; // Scroll to the bottom
+                messageInput.value = ''; // Clear input
+                messageInput.focus();
+
+                // TODO: Save the message to Firestore here
+            }
+             // --- Handle Sending Images ---
+            function sendImage(imageSrc) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'sent');
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                messageElement.innerHTML = `
+                    <p class="has-image">
+                        <img src="${imageSrc}" alt="Uploaded Image" class="chat-image">
+                    </p>
+                    <span class="message-time">${time}</span>
+                `;
+                messageArea.appendChild(messageElement);
+                messageArea.scrollTop = messageArea.scrollHeight;
+
+                // TODO: Upload image to Firebase Storage and save URL to Firestore message here
+            }
+
+
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+             // --- Handle Image Upload ---
+            uploadButton.addEventListener('click', () => {
+                imageInput.click();
+            });
+
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        sendImage(event.target.result); // Display image locally first
+                    };
+                    reader.readAsDataURL(file);
+                }
+                 e.target.value = ''; // Reset file input
+            });
+
+            // Scroll to bottom on initial load
+             messageArea.scrollTop = messageArea.scrollHeight;
+        });
+    </script>
+    <script>
+        // Basic Client-Side Chat Simulation Logic (Needs Firebase integration later)
+        document.addEventListener('DOMContentLoaded', () => {
+            const conversationsList = document.querySelector('.conversations-list');
+            const chatContacts = conversationsList.querySelectorAll('.chat-contact');
+            const activeChatAvatar = document.getElementById('active-chat-avatar');
+            const activeChatName = document.getElementById('active-chat-name');
+            const messageArea = document.getElementById('message-area');
+            const messageInput = document.getElementById('chat-message-input');
+            const sendButton = document.getElementById('chat-send-btn');
+            const uploadButton = document.getElementById('chat-upload-btn');
+            const imageInput = document.getElementById('chat-image-input');
+
+            // --- NEW: Example Message Data ---
+            const exampleMessages = {
+                'thabo123': [ // Matches data-provider-id
+                    { type: 'received', text: 'Hi there! Yes, I can definitely help with that leaking pipe. Can you send me a picture of the leak?', time: 'Yesterday, 4:32 PM' },
+                    { type: 'sent', text: 'Sure, here it is.', time: 'Yesterday, 4:35 PM' },
+                    { type: 'sent', image: 'https://via.placeholder.com/300x200.png?text=Leaking+Pipe+Example', time: 'Yesterday, 4:35 PM' },
+                    { type: 'received', text: 'Thanks. Looks like a straightforward fix. I can come by tomorrow. My call-out fee is R350 which includes the first hour of labor.', time: 'Yesterday, 4:40 PM' },
+                    { type: 'sent', text: 'Sounds good, is 2 PM okay?', time: '10m ago' },
+                    { type: 'received', text: 'Okay, see you then!', time: '5m ago' }
+                ],
+                'jabu456': [
+                    { type: 'sent', text: 'Hi Jabulani, I need my living room painted. Could you give me a quote?', time: 'Yesterday, 10:00 AM' },
+                    { type: 'received', text: 'Morning! Yes, I can. How big is the room? And what color are you thinking?', time: 'Yesterday, 10:05 AM' },
+                    { type: 'sent', text: 'It\'s about 4m x 5m. Just want a standard white paint.', time: 'Yesterday, 10:10 AM' },
+                     { type: 'sent', text: 'Here are some pictures of the current state.', time: 'Yesterday, 10:11 AM' },
+                     { type: 'sent', image: 'https://via.placeholder.com/300x200.png?text=Living+Room+Before', time: 'Yesterday, 10:11 AM' },
+                    { type: 'received', text: 'Thanks for the pictures. I\'ll send through a quote shortly.', time: '1h ago' }
+                ],
+                'maria789': [
+                    { type: 'sent', text: 'Hello Maria, are you available for house cleaning this Friday?', time: 'Tuesday, 9:00 AM' },
+                    { type: 'received', text: 'Hi! Yes, Friday afternoon works for me. What kind of cleaning do you need?', time: 'Tuesday, 9:15 AM' },
+                    { type: 'sent', text: 'Just a standard clean - floors, bathroom, kitchen.', time: 'Tuesday, 9:20 AM' },
+                    { type: 'received', text: 'Okay, great. My rate is R250 for 3 hours. Does that work?', time: 'Yesterday' },
+                     { type: 'received', text: 'Yes, I can do deep cleaning as well.', time: 'Yesterday' } // Example last message
+                ]
+                // Add more provider IDs and message arrays here
+            };
+
+            // --- UPDATED: Function to Load Conversation ---
+            function loadConversation(providerId, providerName, providerAvatar) {
+                activeChatName.textContent = providerName;
+                activeChatAvatar.src = providerAvatar;
+                messageArea.innerHTML = ''; // Clear previous messages
+
+                const messagesToDisplay = exampleMessages[providerId] || []; // Get messages or empty array
+
+                if (messagesToDisplay.length === 0) {
+                     // Optionally display a "No messages yet" placeholder
+                     messageArea.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">Start the conversation!</p>';
+                } else {
+                     messagesToDisplay.forEach(msg => {
+                        const messageElement = document.createElement('div');
+                        messageElement.classList.add('message', msg.type); // 'sent' or 'received'
+
+                        let messageContent = '';
+                        if (msg.text) {
+                            messageContent = `<p>${msg.text}</p>`;
+                        } else if (msg.image) {
+                            messageContent = `<p class="has-image"><img src="${msg.image}" alt="Chat Image" class="chat-image"></p>`;
+                        }
+
+                        messageElement.innerHTML = `
+                            ${messageContent}
+                            <span class="message-time">${msg.time}</span>
+                        `;
+                        messageArea.appendChild(messageElement);
+                    });
+                }
+
+
+                messageArea.scrollTop = messageArea.scrollHeight; // Scroll to bottom
+                console.log(`Switched to conversation with ${providerName} (ID: ${providerId})`);
+                // TODO: When integrating Firebase, fetch REAL messages here
+            }
+
+            // --- Handle Switching Conversations ---
+            chatContacts.forEach(contact => {
+                contact.addEventListener('click', () => {
+                    chatContacts.forEach(c => c.classList.remove('active'));
+                    contact.classList.add('active');
+
+                    const providerId = contact.dataset.providerId; // Get the ID
+                    const providerName = contact.dataset.providerName || 'Unknown Provider';
+                    const providerAvatar = contact.dataset.providerAvatar || 'default-profile-picture.png';
+
+                    loadConversation(providerId, providerName, providerAvatar); // Pass ID to load function
+                });
+            });
+
+            // --- Handle Sending Messages (No changes needed here for now) ---
+            function sendMessage() {
+                const messageText = messageInput.value.trim();
+                if (messageText === '') return;
+
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'sent');
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                messageElement.innerHTML = `
+                    <p>${messageText}</p>
+                    <span class="message-time">${time}</span>
+                `;
+
+                messageArea.appendChild(messageElement);
+                messageArea.scrollTop = messageArea.scrollHeight;
+                messageInput.value = '';
+                messageInput.focus();
+                // TODO: Save the message to Firestore here
+            }
+             // --- Handle Sending Images (No changes needed here for now) ---
+            function sendImage(imageSrc) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'sent');
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                messageElement.innerHTML = `
+                    <p class="has-image">
+                        <img src="${imageSrc}" alt="Uploaded Image" class="chat-image">
+                    </p>
+                    <span class="message-time">${time}</span>
+                `;
+                messageArea.appendChild(messageElement);
+                messageArea.scrollTop = messageArea.scrollHeight;
+                // TODO: Upload image to Firebase Storage and save URL here
+            }
+
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+             // --- Handle Image Upload (No changes needed here for now)---
+            uploadButton.addEventListener('click', () => {
+                imageInput.click();
+            });
+
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        sendImage(event.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+                 e.target.value = '';
+            });
+
+            // Trigger load for the initially active contact on page load
+            const initiallyActiveContact = conversationsList.querySelector('.chat-contact.active');
+            if (initiallyActiveContact) {
+                 const providerId = initiallyActiveContact.dataset.providerId;
+                 const providerName = initiallyActiveContact.dataset.providerName || 'Unknown Provider';
+                 const providerAvatar = initiallyActiveContact.dataset.providerAvatar || 'default-profile-picture.png';
+                 loadConversation(providerId, providerName, providerAvatar);
+            } else {
+                 // Handle case where no contact is active initially (optional)
+                 messageArea.innerHTML = '<p style="text-align: center; color: var(--text-light); margin-top: 20px;">Select a conversation to start chatting.</p>';
+            }
+        });
+    </script>
+
+</body>
+</html>

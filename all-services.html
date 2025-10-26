@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Services - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Chat Page Styles --- */
+        .chat-page-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            z-index: 2000;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+
+        .chat-page-container.active {
+            display: flex;
+            transform: translateX(0);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .chat-back-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .chat-provider-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .chat-provider-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-provider-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chat-provider-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-indicator.online { background-color: #2ecc71; } /* Green */
+        .status-indicator.idle { background-color: #f39c12; } /* Orange */
+        .status-indicator.offline { background-color: #95a5a6; } /* Grey */
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 75%;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message p {
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin: 0;
+            line-height: 1.5;
+        }
+        .message p.has-image {
+            padding: 5px;
+            background-color: transparent !important;
+            border: none !important;
+        }
+        .message .chat-image {
+            max-width: 100%;
+            border-radius: 15px;
+            display: block;
+            max-height: 200px;
+        }
+        .message-time {
+             font-size: 0.75rem;
+             color: var(--text-light);
+             margin-top: 5px;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .message.sent p:not(.has-image) {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+        .message.received p {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 5px;
+        }
+
+
+        .chat-input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            gap: 10px;
+            align-items: center;
+        }
+
+        #chat-message-input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+        }
+        #chat-message-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .chat-action-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #chat-upload-btn {
+            background-color: var(--surface-color);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        #chat-upload-btn:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        #chat-send-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        #chat-send-btn:hover {
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="index.html">Kasi Hustle</a></h2>
+            </div>
+            <div id="auth-container" class="nav-menu">
+                <a href="index.html#home" class="nav-link">Home</a>
+                <a href="index.html#services" class="nav-link">Services</a>
+                <a href="auth.html" class="nav-link btn-auth">Sign Up / Login</a>
+                <button class="theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="services-page">
+        <div class="container">
+            <a href="index.html" class="btn-back" style="margin-bottom: 25px; display: inline-flex; align-items: center; gap: 8px;"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            <div class="section-header">
+                <h2>Search Results</h2>
+                <p>Find trusted local service providers that match your search.</p>
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="service-filter"><i class="fas fa-search"></i> Service or Name</label>
+                    <input type="text" id="service-filter" placeholder="e.g., Plumbing, Catering, Printing">
+                </div>
+                <div class="filter-group">
+                    <label for="location-filter"><i class="fas fa-map-marker-alt"></i> Location</label>
+                    <input type="text" id="location-filter" placeholder="e.g., Mamelodi, Sunnyside">
+                </div>
+                <div class="filter-group">
+                    <label for="rating-filter"><i class="fas fa-star"></i> Min. Rating</label>
+                    <select id="rating-filter">
+                        <option value="1">1 Star+</option>
+                        <option value="2">2 Stars+</option>
+                        <option value="3">3 Stars+</option>
+                        <option value="4" selected>4 Stars+</option>
+                        <option value="5">5 Stars</option>
+                    </select>
+                </div>
+                <button class="btn-primary" id="apply-filters-btn">Apply Filters</button>
+            </div>
+
+            <div class="providers-grid" id="providers-container">
+
+                <div class="provider-card" data-rating="4.5" data-location="Mamelodi" data-status="online">
+                    <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5450410/pexels-photo-5450410.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="Plumber working"></div>
+                    <div class="provider-info">
+                        <h3>Thabo Mthembu</h3>
+                        <p class="provider-service">Plumbing</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Mamelodi</p>
+                        <div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.5 (18 reviews)</span></div>
+                        <div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div>
+                    </div>
+                </div>
+                 <div class="provider-card" data-rating="4.8" data-location="Pretoria East" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/845451/pexels-photo-845451.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="plumber fixing a sink"></div><div class="provider-info"><h3>David Mabena</h3><p class="provider-service">Plumbing</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Pretoria East</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (35 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.7" data-location="Soshanguve" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/8086036/pexels-photo-8086036.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="hot water geyser"></div><div class="provider-info"><h3>Michael van Wyk</h3><p class="provider-service">Plumbing</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.7 (29 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.9" data-location="Centurion" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/896059/pexels-photo-896059.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="drain cleaning equipment"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div><div class="provider-info"><h3>Centurion Drain Blasters</h3><p class="provider-service">Plumbing</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Centurion</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (55 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.6" data-location="Atteridgeville" data-status="idle"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/6479563/pexels-photo-6479563.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="shiny new taps"></div><div class="provider-info"><h3>Bongani Masilela</h3><p class="provider-service">Plumbing</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Atteridgeville</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.6 (22 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="5.0" data-location="Hatfield" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/6180340/pexels-photo-6180340.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="plumber's van at night"></div><div class="provider-info"><h3>Willie's 24/7 Plumbing</h3><p class="provider-service">Plumbing</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Hatfield</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">5.0 (41 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+
+                <div class="provider-card" data-rating="5" data-location="Mamelodi" data-status="idle">
+                    <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/7218525/pexels-photo-7218525.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="Painter painting a wall"></div>
+                    <div class="provider-info">
+                        <h3>Jabulani Sibanda</h3>
+                        <p class="provider-service">Painting</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Mamelodi</p>
+                        <div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">5.0 (62 reviews)</span></div>
+                        <div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div>
+                    </div>
+                </div>
+                 <div class="provider-card" data-rating="4.9" data-location="Waterkloof" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5691629/pexels-photo-5691629.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="painter on a ladder"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div><div class="provider-info"><h3>Themba Radebe</h3><p class="provider-service">Painting</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Waterkloof</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (48 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.7" data-location="Mamelodi" data-status="idle"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/102127/pexels-photo-102127.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="paint cans and brushes"></div><div class="provider-info"><h3>Ayanda Khumalo</h3><p class="provider-service">Painting</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Mamelodi</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.7 (31 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.8" data-location="Sunnyside" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/2180883/pexels-photo-2180883.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="freshly painted modern room"></div><div class="provider-info"><h3>Sunnyside Room Revamp</h3><p class="provider-service">Painting</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Sunnyside</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (40 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.6" data-location="Centurion" data-status="offline"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5691523/pexels-photo-5691523.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="painter taping a wall"></div><div class="provider-info"><h3>Chris Ndlovu</h3><p class="provider-service">Painting</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Centurion</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.6 (25 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.8" data-location="Ga-Rankuwa" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/7218525/pexels-photo-7218525.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="someone painting a roof"></div><div class="provider-info"><h3>Simon Ledwaba</h3><p class="provider-service">Painting</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Ga-Rankuwa</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (38 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+
+                <div class="provider-card" data-rating="4.9" data-location="Ga-Rankuwa" data-status="online">
+                    <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5905709/pexels-photo-5905709.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="Tutor helping student"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div>
+                    <div class="provider-info">
+                        <h3>Samuel Kganakga</h3>
+                        <p class="provider-service">Tutoring</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Ga-Rankuwa</p>
+                        <div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (75 reviews)</span></div>
+                        <div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div>
+                    </div>
+                </div>
+                 <div class="provider-card" data-rating="4.9" data-location="Hatfield" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/3862130/pexels-photo-3862130.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="university students studying"></div><div class="provider-info"><h3>Lerato's Tutoring</h3><p class="provider-service">Tutoring</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Hatfield</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (60 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.8" data-location="Centurion" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5905445/pexels-photo-5905445.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="high school student getting help"></div><div class="provider-info"><h3>Johnathan Booysen</h3><p class="provider-service">Tutoring</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Centurion</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (52 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="5.0" data-location="Moreleta Park" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4145153/pexels-photo-4145153.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="tutor at a student's home"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div><div class="provider-info"><h3>Pretoria Home Tutors</h3><p class="provider-service">Tutoring</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Moreleta Park</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">5.0 (85 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.7" data-location="Brooklyn" data-status="idle"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="library or study center"></div><div class="provider-info"><h3>The Knowledge Hub</h3><p class="provider-service">Tutoring</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Brooklyn</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.7 (43 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.6" data-location="Soshanguve" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/256468/pexels-photo-256468.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="classroom with a teacher"></div><div class="provider-info"><h3>Soshanguve Learning Centre</h3><p class="provider-service">Tutoring</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.6 (39 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="5.0" data-location="Centurion" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/3771089/pexels-photo-3771089.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="maths formulas on a chalkboard"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div><div class="provider-info"><h3>Maths Matrix Tutors</h3><p class="provider-service">Maths Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Centurion</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">5.0 (92 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.8" data-location="Pretoria East" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="online maths tutoring session"></div><div class="provider-info"><h3>e-Tutor Maths</h3><p class="provider-service">Maths Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Pretoria East</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (67 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.9" data-location="Soshanguve" data-status="idle"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5905700/pexels-photo-5905700.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="matric student studying maths"></div><div class="provider-info"><h3>Mr. Kumalo's Maths</h3><p class="provider-service">Maths Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (78 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.7" data-location="Mamelodi" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/8472933/pexels-photo-8472933.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="primary school maths lesson"></div><div class="provider-info"><h3>Junior Maths Academy</h3><p class="provider-service">Maths Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Mamelodi</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.7 (51 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.8" data-location="Hatfield" data-status="offline"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/3762800/pexels-photo-3762800.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="university student in a lecture"></div><div class="provider-info"><h3>Varsity Maths Help</h3><p class="provider-service">Maths Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Hatfield</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (65 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.9" data-location="Hatfield" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/2152/light-science-presentation-dots.jpg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="physics experiment with light"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div><div class="provider-info"><h3>Physics Phakisa Tutors</h3><p class="provider-service">Physics Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Hatfield</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (70 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.8" data-location="Centurion" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5081913/pexels-photo-5081913.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="student looking at physics equations"></div><div class="provider-info"><h3>The Science Cafe</h3><p class="provider-service">Physics Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Centurion</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (58 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.7" data-location="Soshanguve" data-status="idle"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5727918/pexels-photo-5727918.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="high school science lab"></div><div class="provider-info"><h3>Dr. Naledi Radebe</h3><p class="provider-service">Physics Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.7 (45 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.9" data-location="Pretoria East" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/2034851/pexels-photo-2034851.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="telescope pointing at the sky"></div><div class="provider-info"><h3>AstroPhysics Tutors</h3><p class="provider-service">Physics Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Pretoria East</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (62 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.6" data-location="Mamelodi" data-status="offline"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="electronics and circuits"></div><div class="provider-info"><h3>Tebogo Moloi</h3><p class="provider-service">Physics Tutor</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Mamelodi</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.6 (33 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+
+                <div class="provider-card" data-rating="5.0" data-location="Centurion" data-status="online">
+                    <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4239031/pexels-photo-4239031.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="Person cleaning a window"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div>
+                    <div class="provider-info">
+                        <h3>Maria Sithole</h3>
+                        <p class="provider-service">Cleaning Service</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Centurion</p>
+                        <div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">5.0 (105 reviews)</span></div>
+                        <div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div>
+                    </div>
+                </div>
+                <div class="provider-card" data-rating="4.9" data-location="Pretoria East" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4239146/pexels-photo-4239146.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="person deep cleaning a kitchen"></div><div class="provider-info"><h3>Cynthia Baloyi</h3><p class="provider-service">Cleaning</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Pretoria East</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (88 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="5.0" data-location="Mamelodi" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/7131439/pexels-photo-7131439.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="clean modern office"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div><div class="provider-info"><h3>Mamelodi Office Cleaners</h3><p class="provider-service">Cleaning</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Mamelodi</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">5.0 (70 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.8" data-location="Hatfield" data-status="idle"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/6197116/pexels-photo-6197116.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="people cleaning after a party"></div><div class="provider-info"><h3>After-Party Clean-up Crew</h3><p class="provider-service">Cleaning</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Hatfield</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (55 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.9" data-location="Waterkloof" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4099467/pexels-photo-4099467.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="someone using natural cleaning products"></div><div class="provider-info"><h3>Grace Chauke</h3><p class="provider-service">Cleaning</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Waterkloof</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (95 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+
+                <div class="provider-card" data-rating="4.8" data-location="Soweto" data-status="online">
+                    <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4489766/pexels-photo-4489766.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="Mechanic working on a car"></div>
+                    <div class="provider-info">
+                        <h3>Sbu's Auto Repair</h3>
+                        <p class="provider-service">Mechanic</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soweto</p>
+                        <div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (112 reviews)</span></div>
+                        <div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div>
+                    </div>
+                </div>
+                <div class="provider-card" data-rating="4.8" data-location="Menlyn" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4488643/pexels-photo-4488643.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="car on a lift in a workshop"></div><div class="provider-info"><h3>Menlyn Auto Clinic</h3><p class="provider-service">Mechanic</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Menlyn</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (98 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.7" data-location="Pretoria North" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/906494/pexels-photo-906494.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="car's brake disc"></div><div class="provider-info"><h3>Pretoria North Brakes & Clutch</h3><p class="provider-service">Mechanic</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Pretoria North</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.7 (76 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.9" data-location="Soshanguve" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="detailed car engine"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div><div class="provider-info"><h3>Joseph Phiri</h3><p class="provider-service">Mechanic</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (101 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="4.6" data-location="Atteridgeville" data-status="idle"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/8984333/pexels-photo-8984333.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="mechanic working with a flashlight"></div><div class="provider-info"><h3>Tshepo Modise</h3><p class="provider-service">Mechanic</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Atteridgeville</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.6 (63 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                <div class="provider-card" data-rating="5.0" data-location="Brooklyn" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/163726/mercedes-benz-sls-amg-car-vehicle-163726.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="luxury German car being serviced"></div><div class="provider-info"><h3>German Car Specialists PTA</h3><p class="provider-service">Mechanic</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Brooklyn</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">5.0 (120 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+
+                <div class="provider-card" data-rating="4.9" data-location="Waterkloof" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4750275/pexels-photo-4750275.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="beautifully landscaped garden"><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span></div><div class="provider-info"><h3>Waterkloof Landscaping</h3><p class="provider-service">Gardening</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Waterkloof</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><span class="rating-text">4.9 (82 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                 <div class="provider-card" data-rating="4.7" data-location="Centurion" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/6976669/pexels-photo-6976669.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="gardener trimming hedges"></div><div class="provider-info"><h3>Jim's Mowing Centurion</h3><p class="provider-service">Gardening</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Centurion</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.7 (68 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                 <div class="provider-card" data-rating="4.8" data-location="Mamelodi" data-status="idle"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/5847901/pexels-photo-5847901.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="garden clean-up"></div><div class="provider-info"><h3>Mandla's Garden Service</h3><p class="provider-service">Gardening</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Mamelodi</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.8 (75 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                 <div class="provider-card" data-rating="4.6" data-location="Soshanguve" data-status="online"><div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/776077/pexels-photo-776077.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="irrigation system sprinkler"></div><div class="provider-info"><h3>Isaac Mabaso</h3><p class="provider-service">Gardening</p><p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve</p><div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.6 (59 reviews)</span></div><div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div></div></div>
+                 <div class="provider-card" data-rating="4.5" data-location="Soshanguve" data-status="offline"> <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4513940/pexels-photo-4513940.jpeg?auto=compress&cs=tinysrgb&w=600" loading="lazy" alt="Gardener with plants"></div>
+                    <div class="provider-info">
+                        <h3>Nomsa Dlamini</h3>
+                        <p class="provider-service">Gardening</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve</p>
+                        <div class="provider-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-text">4.5 (50 reviews)</span></div>
+                        <div class="provider-actions"><a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a><a href="#" class="btn-profile">View Profile</a></div>
+                    </div>
+                 </div>
+
+             </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 Kasi Hustle. All rights reserved.</p></div></div>
+    </footer>
+
+    <div id="chat-page" class="chat-page-container">
+        <div class="chat-header">
+            <button id="chat-back-btn" class="chat-back-btn"><i class="fas fa-arrow-left"></i></button>
+            <img id="chat-provider-avatar" src="" alt="Provider Avatar" class="chat-provider-avatar">
+            <div class="chat-provider-info">
+                <h3 id="chat-provider-name" class="chat-provider-name"></h3>
+                <div id="chat-provider-status" class="chat-provider-status">
+                    <span class="status-indicator"></span>
+                    <span class="status-text"></span>
+                </div>
+            </div>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+             <div class="message received">
+                <p>Hi there! How can I help you today?</p>
+                <span class="message-time">10:30 AM</span>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="file" id="chat-image-input" accept="image/*" style="display: none;">
+            <button id="chat-upload-btn" class="chat-action-btn"><i class="fas fa-paperclip"></i></button>
+            <input type="text" id="chat-message-input" placeholder="Type a message...">
+            <button id="chat-send-btn" class="chat-action-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script src="theme.js"></script>
+    <script type="module" src="auth-status.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const applyFiltersBtn = document.getElementById('apply-filters-btn');
+        const serviceInput = document.getElementById('service-filter');
+        const locationInput = document.getElementById('location-filter');
+        const ratingSelect = document.getElementById('rating-filter');
+        const providerCards = document.querySelectorAll('.provider-card');
+
+        // --- Chat Functionality ---
+        const chatPage = document.getElementById('chat-page');
+        const messageButtons = document.querySelectorAll('.btn-contact'); // Re-select after potentially adding/removing cards
+        const chatBackButton = document.getElementById('chat-back-btn');
+        const chatProviderAvatar = document.getElementById('chat-provider-avatar');
+        const chatProviderName = document.getElementById('chat-provider-name');
+        const chatProviderStatus = document.getElementById('chat-provider-status');
+        const statusIndicator = chatProviderStatus.querySelector('.status-indicator');
+        const statusText = chatProviderStatus.querySelector('.status-text');
+        const chatMessagesContainer = document.getElementById('chat-messages');
+        const chatMessageInput = document.getElementById('chat-message-input');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+        const chatUploadBtn = document.getElementById('chat-upload-btn');
+        const chatImageInput = document.getElementById('chat-image-input');
+
+        function filterProviders() {
+            const serviceQuery = serviceInput.value.toLowerCase().trim();
+            const locationQuery = locationInput.value.toLowerCase().trim();
+            const minRating = parseFloat(ratingSelect.value);
+
+            providerCards.forEach(card => {
+                const cardName = card.querySelector('.provider-info h3').textContent.toLowerCase();
+                // Ensure provider-service element exists before trying to read its text content
+                const serviceElement = card.querySelector('.provider-service');
+                const cardService = serviceElement ? serviceElement.textContent.toLowerCase() : '';
+
+                // Ensure data-location attribute exists
+                const cardLocation = card.dataset.location ? card.dataset.location.toLowerCase() : '';
+                 // Ensure data-rating attribute exists and is a number
+                const cardRating = card.dataset.rating ? parseFloat(card.dataset.rating) : 0; // Default to 0 if missing
+
+
+                const serviceMatch = serviceQuery === '' || cardName.includes(serviceQuery) || cardService.includes(serviceQuery);
+                const locationMatch = locationQuery === '' || cardLocation.includes(locationQuery);
+                const ratingMatch = cardRating >= minRating;
+
+                // Make sure card exists before trying to set its style
+                if (card) {
+                     card.style.display = (serviceMatch && locationMatch && ratingMatch) ? 'block' : 'none';
+                }
+            });
+        }
+
+        if (applyFiltersBtn) {
+            applyFiltersBtn.addEventListener('click', filterProviders);
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const serviceQueryParam = urlParams.get('q');
+        const locationQueryParam = urlParams.get('loc');
+
+        if (serviceQueryParam) {
+            serviceInput.value = serviceQueryParam;
+        }
+        if (locationQueryParam) {
+            locationInput.value = locationQueryParam;
+        }
+
+        // Run initial filter if URL parameters are present
+        if (serviceQueryParam || locationQueryParam) {
+            filterProviders();
+        }
+
+        // Attach chat listeners to CURRENTLY VISIBLE buttons after filtering/DOM changes
+        // It's better to attach listeners to the container and use event delegation if cards are added/removed dynamically later.
+        // For now, re-querying might work for this static example.
+        document.querySelectorAll('.btn-contact').forEach(button => { // Re-query buttons
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                const card = button.closest('.provider-card');
+                 if (!card) return; // Exit if card not found
+
+                const providerName = card.querySelector('.provider-info h3')?.textContent || 'Unknown Provider';
+                const providerAvatarSrc = card.querySelector('.provider-photo')?.src || 'default-profile-picture.png'; // Fallback image
+                const providerStatus = card.dataset.status || 'offline'; // Default status
+
+                chatProviderName.textContent = providerName;
+                chatProviderAvatar.src = providerAvatarSrc;
+
+                statusIndicator.className = 'status-indicator'; // Reset class
+                switch (providerStatus) {
+                    case 'online':
+                        statusIndicator.classList.add('online');
+                        statusText.textContent = 'Online';
+                        break;
+                    case 'idle':
+                        statusIndicator.classList.add('idle');
+                        statusText.textContent = 'Away';
+                        break;
+                    default: // Handles 'offline' or any other value
+                        statusIndicator.classList.add('offline');
+                        statusText.textContent = 'Offline';
+                }
+
+                chatPage.classList.add('active');
+            });
+        });
+
+        function closeChat() {
+            chatPage.classList.remove('active');
+        }
+
+        function sendMessage() {
+            const messageText = chatMessageInput.value.trim();
+            if (messageText === '') return;
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'sent');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageElement.innerHTML = `<p>${messageText}</p><span class="message-time">${time}</span>`;
+
+            chatMessagesContainer.appendChild(messageElement);
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; // Scroll to bottom
+            chatMessageInput.value = '';
+            chatMessageInput.focus();
+        }
+
+        // Simplified image sending (like before)
+         function sendImage(imageSrc) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'sent');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageElement.innerHTML = `
+                <p class="has-image">
+                    <img src="${imageSrc}" alt="Uploaded Image" class="chat-image">
+                </p>
+                <span class="message-time">${time}</span>
+            `;
+            chatMessagesContainer.appendChild(messageElement);
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        }
+
+        chatBackButton?.addEventListener('click', closeChat); // Add null checks
+        chatSendBtn?.addEventListener('click', sendMessage);
+        chatMessageInput?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        chatUploadBtn?.addEventListener('click', () => {
+             chatImageInput?.click();
+        });
+        chatImageInput?.addEventListener('change', (e) => {
+             const file = e.target.files[0];
+             if (file && file.type.startsWith('image/')) {
+                 const reader = new FileReader();
+                 reader.onload = (event) => {
+                     sendImage(event.target.result);
+                 };
+                 reader.readAsDataURL(file);
+             }
+             e.target.value = ''; // Reset file input
+        });
+
+    });
+    </script>
+</body>
+</html>

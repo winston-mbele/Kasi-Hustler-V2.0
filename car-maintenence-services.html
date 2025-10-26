@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Maintenance Services - Kasi Hustle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Root Variables & General Styling --- */
+        :root {
+            --primary-color: #dc2626;
+            --primary-hover: #b91c1c;
+            --secondary-color: #4b5563;
+            --text-color: #111827;
+            --text-light: #6b7280;
+            --background-color: #f9fafb;
+            --surface-color: #ffffff;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --font-family: 'Inter', sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --border-radius: 8px;
+        }
+
+        body.dark-mode {
+            --primary-color: #ef4444;
+            --primary-hover: #f87171;
+            --secondary-color: #9ca3af;
+            --text-color: #f9fafb;
+            --text-light: #d1d5db;
+            --background-color: #111827;
+            --surface-color: #1f2937;
+            --border-color: #374151;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: var(--primary-hover);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* --- Buttons --- */
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* --- Navigation --- */
+        .navbar {
+            background-color: var(--surface-color);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo h2 a {
+            color: var(--text-color);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-link {
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-color);
+        }
+
+        .btn-auth {
+            background-color: var(--primary-color);
+            color: #fff !important;
+            padding: 10px 18px;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s;
+        }
+        .btn-auth:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .hamburger { display: none; cursor: pointer; }
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            margin: 5px 0;
+            background-color: var(--text-color);
+            transition: all 0.3s;
+        }
+
+        /* --- Main Content --- */
+        .services-page { padding: 40px 0; }
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* --- Filter Bar --- */
+        .filter-bar {
+            background-color: var(--surface-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-weight: 500; font-size: 0.9rem; color: var(--text-light); }
+        .filter-group input, .filter-group select {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--background-color);
+            color: var(--text-color);
+        }
+
+        /* --- Providers Grid --- */
+        .providers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .provider-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .provider-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        .provider-image { position: relative; }
+        .provider-photo {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        .verified-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--success-color);
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        .provider-info { padding: 20px; }
+        .provider-info h3 { margin: 0 0 5px; font-size: 1.2rem; }
+        .provider-service, .provider-location { color: var(--text-light); margin-bottom: 10px; }
+        .provider-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
+        .stars { color: #facc15; }
+        .rating-text { font-size: 0.9rem; color: var(--text-light); }
+        .provider-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-contact, .btn-profile {
+            flex-grow: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-contact { background-color: var(--primary-color); color: #fff; }
+        .btn-profile { background-color: var(--surface-color); color: var(--text-color); border: 1px solid var(--border-color); }
+        .btn-contact:hover { background-color: var(--primary-hover); color: #fff; }
+        .btn-profile:hover { background-color: var(--background-color); }
+        
+        /* --- Footer --- */
+        .footer {
+            background-color: var(--surface-color);
+            padding-top: 50px;
+            border-top: 1px solid var(--border-color);
+        }
+        .footer-bottom {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        /* --- Chat Page Styles --- */
+        .chat-page-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            z-index: 2000;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+
+        .chat-page-container.active {
+            display: flex;
+            transform: translateX(0);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .chat-back-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .chat-provider-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .chat-provider-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-provider-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chat-provider-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-indicator.online { background-color: #2ecc71; } /* Green */
+        .status-indicator.idle { background-color: #f39c12; } /* Orange */
+        .status-indicator.offline { background-color: #95a5a6; } /* Grey */
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 75%;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message p {
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin: 0;
+            line-height: 1.5;
+        }
+        .message p.has-image {
+            padding: 5px;
+            background-color: transparent !important;
+            border: none !important;
+        }
+        .message .chat-image {
+            max-width: 100%;
+            border-radius: 15px;
+            display: block;
+            max-height: 200px;
+        }
+        .message-time {
+             font-size: 0.75rem;
+             color: var(--text-light);
+             margin-top: 5px;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .message.sent p:not(.has-image) {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+        .message.received p {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 5px;
+        }
+
+
+        .chat-input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            gap: 10px;
+            align-items: center;
+        }
+
+        #chat-message-input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+        }
+        #chat-message-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .chat-action-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #chat-upload-btn {
+            background-color: var(--surface-color);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        #chat-upload-btn:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+        
+        #chat-send-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        #chat-send-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+
+        /* --- Responsive Design --- */
+        @media (max-width: 992px) {
+            .nav-menu {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                height: 100%;
+                flex-direction: column;
+                background-color: var(--surface-color);
+                padding: 20px;
+                box-shadow: var(--shadow-md);
+                transition: left 0.3s;
+                align-items: flex-start;
+            }
+            .nav-menu.active { left: 0; }
+            .nav-menu .btn-auth { width: 100%; text-align: center; margin-top: 20px;}
+            .hamburger { display: block; z-index: 1001; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="index.html">Kasi Hustle</a></h2>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html#home" class="nav-link">Home</a>
+                <a href="index.html#services" class="nav-link">Services</a>
+                <div id="auth-container" class="waiting-auth">
+                    <a href="auth.html" class="nav-link btn-auth">Sign Up / Login</a>
+                </div>
+                <button class="theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+    
+    <main class="services-page">
+        <div class="container">
+            <div class="section-header">
+                <h2>Car Maintenance</h2>
+                <p>Find trusted mechanics, car washes, and auto electricians in your area.</p>
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="location-filter"><i class="fas fa-map-marker-alt"></i> Location</label>
+                    <input type="text" id="location-filter" placeholder="e.g., Soweto">
+                </div>
+                <div class="filter-group">
+                    <label for="rating-filter"><i class="fas fa-star"></i> Min. Rating</label>
+                    <select id="rating-filter">
+                        <option value="1">1 Star+</option>
+                        <option value="2">2 Stars+</option>
+                        <option value="3">3 Stars+</option>
+                        <option value="4" selected>4 Stars+</option>
+                        <option value="5">5 Stars</option>
+                    </select>
+                </div>
+                <button class="btn-primary" id="apply-filters-btn">Apply Filters</button>
+            </div>
+
+            <div class="providers-grid" id="providers-container">
+                <!-- Car Service Providers -->
+                <div class="provider-card" data-rating="4.8" data-location="Soweto" data-status="online">
+                    <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/4488636/pexels-photo-4488636.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" loading="lazy" alt="Mechanic working on a car"></div>
+                    <div class="provider-info">
+                        <h3>Sbu's Auto Repair</h3>
+                        <p class="provider-service">Mechanic</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soweto</p>
+                        <div class="provider-rating">
+                            <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                            <span class="rating-text">(112 reviews)</span>
+                        </div>
+                        <div class="provider-actions">
+                            <a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a>
+                            <a href="#" class="btn-profile">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="provider-card" data-rating="5" data-location="Tembisa" data-status="idle">
+                    <div class="provider-image">
+                        <img class="provider-photo" src="https://images.pexels.com/photos/3807279/pexels-photo-3807279.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" loading="lazy" alt="Car being washed">
+                        <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>
+                    </div>
+                    <div class="provider-info">
+                        <h3>Gleam Team Car Wash</h3>
+                        <p class="provider-service">Car Wash & Detailing</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Tembisa</p>
+                        <div class="provider-rating">
+                            <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                            <span class="rating-text">(250 reviews)</span>
+                        </div>
+                        <div class="provider-actions">
+                           <a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a>
+                            <a href="#" class="btn-profile">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="provider-card" data-rating="4.5" data-location="Soweto" data-status="offline">
+                    <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/8994236/pexels-photo-8994236.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" loading="lazy" alt="Auto electrician checking wires"></div>
+                    <div class="provider-info">
+                        <h3>Sparks & Wires Auto</h3>
+                        <p class="provider-service">Auto Electrician</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Soweto</p>
+                        <div class="provider-rating">
+                            <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                            <span class="rating-text">(75 reviews)</span>
+                        </div>
+                        <div class="provider-actions">
+                           <a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a>
+                            <a href="#" class="btn-profile">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="provider-card" data-rating="4.7" data-location="Katlehong" data-status="online">
+                    <div class="provider-image"><img class="provider-photo" src="https://images.pexels.com/photos/6870321/pexels-photo-6870321.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" loading="lazy" alt="Tyre fitting service"></div>
+                    <div class="provider-info">
+                        <h3>Katlehong Tyre Fitment</h3>
+                        <p class="provider-service">Tyre Sales & Services</p>
+                        <p class="provider-location"><i class="fas fa-map-marker-alt"></i> Katlehong</p>
+                        <div class="provider-rating">
+                            <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                            <span class="rating-text">(98 reviews)</span>
+                        </div>
+                        <div class="provider-actions">
+                           <a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a>
+                            <a href="#" class="btn-profile">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 Kasi Hustle. All rights reserved.</p></div></div>
+    </footer>
+
+    <!-- CHAT PAGE STRUCTURE -->
+    <div id="chat-page" class="chat-page-container">
+        <div class="chat-header">
+            <button id="chat-back-btn" class="chat-back-btn"><i class="fas fa-arrow-left"></i></button>
+            <img id="chat-provider-avatar" src="" alt="Provider Avatar" class="chat-provider-avatar">
+            <div class="chat-provider-info">
+                <h3 id="chat-provider-name" class="chat-provider-name"></h3>
+                <div id="chat-provider-status" class="chat-provider-status">
+                    <span class="status-indicator"></span>
+                    <span class="status-text"></span>
+                </div>
+            </div>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+             <!-- Messages will be injected here -->
+             <div class="message received">
+                <p>Hi there! How can I help you today?</p>
+                <span class="message-time">10:30 AM</span>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="file" id="chat-image-input" accept="image/*" style="display: none;">
+            <button id="chat-upload-btn" class="chat-action-btn"><i class="fas fa-paperclip"></i></button>
+            <input type="text" id="chat-message-input" placeholder="Type a message...">
+            <button id="chat-send-btn" class="chat-action-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // --- Theme Toggler ---
+        const themeToggle = document.querySelector('.theme-toggle');
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        }
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+            themeToggle.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+            localStorage.setItem('theme', theme);
+        });
+
+        // --- Mobile Menu ---
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        // --- Provider Filtering ---
+        const applyFiltersBtn = document.getElementById('apply-filters-btn');
+        const locationInput = document.getElementById('location-filter');
+        const ratingSelect = document.getElementById('rating-filter');
+        const providersContainer = document.getElementById('providers-container');
+        const providerCards = providersContainer.querySelectorAll('.provider-card');
+
+        function filterProviders() {
+            const locationQuery = locationInput.value.toLowerCase().trim();
+            const minRating = parseFloat(ratingSelect.value);
+
+            providerCards.forEach(card => {
+                const cardLocation = card.dataset.location.toLowerCase();
+                const cardRating = parseFloat(card.dataset.rating);
+                const locationMatch = locationQuery === '' || cardLocation.includes(locationQuery);
+                const ratingMatch = cardRating >= minRating;
+
+                card.style.display = (locationMatch && ratingMatch) ? 'block' : 'none';
+            });
+        }
+        if (applyFiltersBtn) {
+            applyFiltersBtn.addEventListener('click', filterProviders);
+        }
+
+        // --- Chat Functionality ---
+        const chatPage = document.getElementById('chat-page');
+        const messageButtons = document.querySelectorAll('.btn-contact');
+        const chatBackButton = document.getElementById('chat-back-btn');
+        const chatProviderAvatar = document.getElementById('chat-provider-avatar');
+        const chatProviderName = document.getElementById('chat-provider-name');
+        const chatProviderStatus = document.getElementById('chat-provider-status');
+        const statusIndicator = chatProviderStatus.querySelector('.status-indicator');
+        const statusText = chatProviderStatus.querySelector('.status-text');
+        const chatMessagesContainer = document.getElementById('chat-messages');
+        const chatMessageInput = document.getElementById('chat-message-input');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+        const chatUploadBtn = document.getElementById('chat-upload-btn');
+        const chatImageInput = document.getElementById('chat-image-input');
+        
+        messageButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const card = button.closest('.provider-card');
+                const providerName = card.querySelector('.provider-info h3').textContent;
+                const providerAvatarSrc = card.querySelector('.provider-photo').src;
+                const providerStatus = card.dataset.status;
+
+                chatProviderName.textContent = providerName;
+                chatProviderAvatar.src = providerAvatarSrc;
+
+                // Update Status
+                statusIndicator.className = 'status-indicator'; // Reset classes
+                switch (providerStatus) {
+                    case 'online':
+                        statusIndicator.classList.add('online');
+                        statusText.textContent = 'Online';
+                        break;
+                    case 'idle':
+                        statusIndicator.classList.add('idle');
+                        statusText.textContent = 'Away';
+                        break;
+                    case 'offline':
+                        statusIndicator.classList.add('offline');
+                        statusText.textContent = 'Offline';
+                        break;
+                    default:
+                        statusIndicator.classList.add('offline');
+                        statusText.textContent = 'Offline';
+                }
+
+                chatPage.classList.add('active');
+            });
+        });
+
+        function closeChat() {
+            chatPage.classList.remove('active');
+        }
+
+        function sendMessage() {
+            const messageText = chatMessageInput.value.trim();
+            if (messageText === '') return;
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'sent');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageElement.innerHTML = `
+                <p>${messageText}</p>
+                <span class="message-time">${time}</span>
+            `;
+
+            chatMessagesContainer.appendChild(messageElement);
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+            chatMessageInput.value = '';
+            chatMessageInput.focus();
+        }
+
+        function sendImage(imageSrc) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'sent');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageElement.innerHTML = `
+                <p class="has-image">
+                    <img src="${imageSrc}" alt="Uploaded Image" class="chat-image">
+                </p>
+                <span class="message-time">${time}</span>
+            `;
+            chatMessagesContainer.appendChild(messageElement);
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        }
+
+        chatBackButton.addEventListener('click', closeChat);
+        chatSendBtn.addEventListener('click', sendMessage);
+        chatMessageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        chatUploadBtn.addEventListener('click', () => {
+            chatImageInput.click();
+        });
+
+        chatImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    sendImage(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+            e.target.value = '';
+        });
+    });
+    </script>
+</body>
+</html>

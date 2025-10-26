@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Provider Dashboard</title> <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CRUCIAL FIX: Remove default browser margins */
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- UNIQUE STYLES FOR SERVICE PROVIDER DASHBOARD --- */
+
+        .dashboard-page {
+            padding: 0 0 40px 0; /* No top padding */
+        }
+
+        /* Unauthorized Message & Loading */
+        #unauthorized-message {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            margin-top: 50px;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color); /* Neutral border */
+            color: var(--text-color);
+            border-radius: var(--border-radius);
+            margin: 40px auto;
+            max-width: 600px;
+        }
+         #unauthorized-message h2 { color: var(--primary-color); } /* Changed color */
+
+
+        #loading-spinner {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5rem;
+            color: var(--text-light);
+        }
+
+        .dashboard-content {
+            display: none; /* Hidden by default until authorized */
+        }
+
+        .header-section {
+            background-color: var(--surface-color);
+            padding: 30px;
+            margin-top: 30px;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            top: 70px; /* Adjust based on actual navbar height */
+            z-index: 999;
+            box-shadow: var(--shadow-md);
+        }
+
+        .logo-container { /* Renamed from profile-avatar for clarity */
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-upload-btn { /* Renamed from edit-avatar-btn */
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid var(--surface-color);
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+
+        .header-info h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .header-info p { /* For Service Type/Industry */
+            color: var(--text-light);
+            margin: 5px 0 0;
+            font-weight: 500;
+        }
+
+        /* Layout for Main Content and Sidebar */
+        .dashboard-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+             padding-top: 30px; /* Adjust as needed */
+
+        }
+
+        .main-content-section { /* Renamed from job-listings-section */
+            flex: 3;
+        }
+
+        .sidebar-section { /* Renamed from business-info-section */
+            flex: 1;
+        }
+
+        .section-card {
+            background-color: var(--surface-color);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm); /* Added subtle shadow */
+        }
+
+        .section-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2rem; /* Slightly smaller heading */
+        }
+
+
+        /* Edit Mode Styles */
+        .editable-input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: inherit;
+            box-sizing: border-box; /* Include padding/border in width */
+        }
+
+        .edit-mode-active .editable-text {
+            display: none;
+        }
+
+        .edit-mode-active .editable-input-group,
+        .edit-mode-active .editable-input {
+            display: block !important; /* Force display in edit mode */
+        }
+
+         /* Portfolio Styles */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .portfolio-item {
+            position: relative;
+            height: 150px;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+        }
+        .portfolio-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .delete-img-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(220, 38, 38, 0.8); /* Semi-transparent red */
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.3s;
+        }
+        .portfolio-item:hover .delete-img-btn {
+            opacity: 1; /* Show on hover */
+        }
+        .delete-img-btn:hover { background-color: var(--primary-color); }
+
+        /* --- Portfolio Upgrade Prompt --- */
+        #portfolio-upgrade-prompt {
+            display: none; /* Hidden by default */
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fffbeb; /* Light yellow */
+            border: 1px solid #fef3c7; /* Lighter yellow border */
+            border-radius: var(--border-radius);
+            text-align: center;
+            color: #b45309; /* Darker yellow/brown text */
+            font-size: 0.9rem;
+        }
+        #portfolio-upgrade-prompt a {
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        /* --- NEW: Premium CTA Section Styling --- */
+        .premium-cta-section {
+            /* No margin-top needed if placed right after portfolio card */
+            margin-bottom: 20px; /* Same bottom margin as section-card */
+            padding: 25px;
+            background-color: #fffbeb; /* Light yellow background */
+            border: 1px solid #fef3c7; /* Lighter yellow border */
+            border-radius: var(--border-radius);
+            color: #b45309; /* Darker yellow/brown text */
+            box-shadow: var(--shadow-sm); /* Add subtle shadow */
+        }
+        .premium-cta-section h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            color: var(--primary-color); /* Use primary color for heading */
+            border-bottom: none; /* No border for this heading */
+            padding-bottom: 0;
+        }
+        .premium-cta-section p {
+            margin-bottom: 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #b45309; /* Ensure text color matches */
+        }
+        .premium-cta-section ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 25px;
+        }
+        .premium-cta-section li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            color: #b45309; /* Ensure list item text color matches */
+        }
+        .premium-cta-section li i {
+            color: var(--success-color); /* Green checkmark */
+            font-size: 1.1rem;
+        }
+         /* Style for bold text within list items */
+         .premium-cta-section li strong {
+             color: #92400e; /* Slightly darker brown for emphasis */
+         }
+        /* --- END NEW --- */
+
+
+        /* Service Rates List */
+        .service-rates ul { list-style: none; padding: 0; margin: 0; }
+        .service-rates li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .service-rates li:last-child { border-bottom: none; }
+
+        /* --- Availability Modal Styles --- */
+         .modal {
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto; /* Allow scrolling if content is long */
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 650px; /* Slightly wider for better layout */
+            box-shadow: var(--shadow-md);
+            position: relative;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+            margin: 20px 0; /* Add margin for scroll */
+        }
+
+        .modal.open .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .close-btn {
+            color: var(--text-light);
+            position: absolute; /* Position relative to modal-content */
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: var(--primary-color);
+        }
+
+        .availability-form h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .day-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr auto; /* Day | Start | End | Checkbox */
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .day-row:last-child {
+             border-bottom: none;
+             margin-bottom: 0;
+             padding-bottom: 0;
+        }
+
+        .day-row label {
+            font-weight: 600;
+        }
+
+        .day-row input[type="time"] {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .day-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            justify-self: end; /* Align checkbox to the right */
+        }
+
+        /* Disable time inputs when checkbox is unchecked */
+        .day-row:has(input[type="checkbox"]:not(:checked)) input[type="time"] {
+             background-color: var(--background-color);
+             opacity: 0.5;
+             pointer-events: none;
+        }
+
+        .modal-actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        #availability-display {
+             margin-top: 10px;
+             color: var(--text-light);
+             font-size: 0.9rem;
+             line-height: 1.6; /* Improve readability for multi-line display */
+        }
+
+        /* --- Freemium Styles --- */
+        .plan-info {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .upgrade-prompt p {
+             margin-bottom: 10px;
+             font-size: 0.9rem;
+             color: var(--text-light);
+        }
+        .full-width { /* Utility class */
+             display: block;
+             width: 100%;
+             text-align: center;
+             box-sizing: border-box;
+        }
+         button:disabled { /* Style for disabled buttons */
+             opacity: 0.6;
+             cursor: not-allowed;
+         }
+
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-layout {
+                flex-direction: column;
+            }
+            .sidebar-section { /* Renamed */
+                position: static; /* Ensure sidebar scrolls normally on smaller screens */
+            }
+
+            /* Disable sticky header on smaller screens */
+            .header-section {
+                position: static;
+                box-shadow: var(--shadow-sm);
+            }
+        }
+         @media (max-width: 768px) {
+             .header-section {
+                 flex-direction: column;
+                 align-items: flex-start; /* Align items left on mobile */
+             }
+             .day-row {
+                 grid-template-columns: 1fr; /* Stack elements on small screens */
+                 gap: 10px;
+                 text-align: left;
+             }
+             .day-row label {
+                 grid-row: 1; /* Ensure label is first */
+             }
+             .day-row input[type="checkbox"] {
+                 justify-self: start; /* Align left */
+                 grid-row: 2; /* Place checkbox second */
+                 margin-bottom: 5px;
+             }
+              .day-row .time-inputs { /* Added wrapper for mobile */
+                  grid-row: 3;
+                  display: flex;
+                  gap: 10px;
+              }
+             .day-row input[type="time"] {
+                 flex: 1; /* Make time inputs share space */
+             }
+         }
+
+         /* --- Styles for Skill Tags --- */
+        .skills-tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px; /* Spacing between tags */
+            margin-top: 10px; /* Space above tags */
+        }
+        .skill-tag {
+            display: inline-block;
+            background-color: var(--background-color);
+            color: var(--secondary-color);
+            padding: 5px 12px;
+            border-radius: 15px; /* Rounded pill shape */
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+        }
+        /* Ensure edit mode input group displays correctly */
+        .edit-mode-active .editable-input-group {
+             display: block !important;
+        }
+
+         
+
+    </style>
+</head>
+<body class="dashboard-page">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="all-services.html" class="nav-link">Find Services</a>
+                <div id="auth-container" class="waiting-auth">
+                    </div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <div id="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i> Loading Dashboard...
+    </div>
+
+    <div class="container" id="unauthorized-message">
+        <h2>Unauthorized Access</h2>
+        <p>You need a **Service Provider Account** to view this dashboard. Please log in with the correct account type.</p> <a href="myprofile.html" class="btn-primary">Go to Personal Profile</a>
+        <a href="auth.html" class="btn-secondary">Log In / Sign Up</a>
+    </div>
+
+    <div class="dashboard-content" id="dashboard-content">
+        <div class="container">
+            <div class="header-section">
+                <div class="logo-container"> <img id="provider-logo" src="https://placehold.co/100x100/dc2626/ffffff?text=LOGO" alt="Service Provider Logo">
+                    <label for="logoUpload" class="logo-upload-btn"><i class="fas fa-pencil-alt"></i></label>
+                    <input type="file" id="logoUpload" accept="image/*" style="display:none;">
+                </div>
+                <div class="header-info">
+                    <h1 id="provider-name" class="editable-text">Your Service Name</h1> <input type="text" id="provider-name-edit" class="editable-input" style="display:none;">
+                    <p class="editable-text" id="provider-service-type">Service Type: e.g., Plumbing, Catering</p> <input type="text" id="provider-service-type-edit" class="editable-input" style="display:none;">
+                </div>
+                <div style="margin-left: auto;">
+                    <button class="btn-secondary" id="edit-profile-btn"><i class="fas fa-pencil-alt"></i> Edit Info</button>
+                </div>
+            </div>
+
+
+            <div class="dashboard-layout">
+                <div class="main-content-section"> <div class="section-card">
+                        <h3><i class="fas fa-info-circle"></i> About My Service</h3>
+                        <p id="provider-description" class="editable-text"> Describe your services, experience, and what makes you stand out. Help customers understand why they should choose you!
+                        </p>
+                        <textarea id="provider-description-edit" class="editable-input" rows="4" style="display:none;"></textarea>
+                    </div>
+                    <div class="section-card">
+                        <h3><i class="fas fa-tags"></i> Skills & Specialties</h3>
+                        <div id="skills-display" class="editable-text skills-tags-container">
+                            <p style="color: var(--text-light);">Add specific skills customers might search for (e.g., geyser repair, matric maths).</p>
+                        </div>
+                        <div class="editable-input-group" style="display:none;">
+                             <label for="skills-edit" style="display: block; margin-bottom: 5px; font-weight: 500;">Enter skills separated by commas</label>
+                             <input type="text" id="skills-edit" class="editable-input" placeholder="e.g., geyser repair, drain unblocking, interior painting">
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                         <h3><i class="fas fa-camera"></i> My Portfolio <span id="portfolio-count">(0/5 Free Uploads)</span></h3>
+                         <div class="portfolio-grid" id="portfolio-grid">
+                             <p style="color: var(--text-light); grid-column: 1 / -1;">Upload images of your work to showcase your skills.</p>
+                             </div>
+                         <input type="file" id="portfolio-upload" accept="image/*" multiple style="display:none;">
+                         <button id="upload-portfolio-btn" class="btn-secondary full-width" style="margin-top: 15px;">
+                             <i class="fas fa-upload"></i> Add Portfolio Images
+                         </button>
+                         <div id="portfolio-upgrade-prompt">
+                              You've reached the free limit of 5 portfolio images. <a href="#">Upgrade to Professional</a> for unlimited uploads!
+                           </div>
+                      </div>
+
+                    <div class="premium-cta-section">
+                         <h2>🚀 Boost Your Hustle with Premium!</h2>
+                         <p>Get noticed by more customers and unlock powerful features to grow your service business on Kasi Hustle.</p>
+                         <ul>
+                             <li><i class="fas fa-check-circle"></i> <strong>Unlimited</strong> Portfolio Uploads</li>
+                             <li><i class="fas fa-check-circle"></i> <strong>Verified Badge</strong> for More Trust</li>
+                             <li><i class="fas fa-check-circle"></i> <strong>Top Placement</strong> in Search Results</li>
+                             <li><i class="fas fa-check-circle"></i> <strong>20% Off</strong> Featured Listing</li> </ul>
+                             </ul>
+                         <a href="#" class="btn-primary full-width"><i class="fas fa-star"></i> Upgrade Now for Only R99/month</a>
+                     </div>
+                     </div>
+
+                <div class="sidebar-section">
+                     <div class="section-card upgrade-prompt">
+                           <h3><i class="fas fa-check-circle"></i> Get Verified</h3>
+                           <p>Build trust with customers. (Included with Premium)</p>
+                           <button class="btn-secondary full-width" disabled><i class="fas fa-arrow-up"></i> Upgrade to Get Verified</button>
+                      </div>
+
+                    <div class="section-card">
+                        <h3><i class="fas fa-phone"></i> Contact Info</h3>
+                        <p><i class="fas fa-envelope"></i> <span id="provider-email">email@example.com</span></p> <p><i class="fas fa-phone"></i> <span id="provider-phone" class="editable-text">+27 00 000 0000</span></p>
+                        <input type="text" id="provider-phone-edit" class="editable-input" style="display:none;">
+                        <p><i class="fas fa-map-marker-alt"></i> <span id="provider-location" class="editable-text">Your primary service area</span></p>
+                         <input type="text" id="provider-location-edit" class="editable-input" style="display:none;">
+                    </div>
+
+                    <div class="section-card service-rates">
+                        <h3><i class="fas fa-tags"></i> Service Rates</h3>
+                        <ul id="service-rates-list">
+                            <li><span>General Call-out</span><strong>R 300</strong></li>
+                            </ul>
+                         <button id="edit-rates-btn" class="btn-secondary full-width" style="margin-top: 15px;"><i class="fas fa-edit"></i> Edit Rates</button>
+                    </div>
+
+                     <div class="section-card">
+                           <h3><i class="fas fa-calendar-alt"></i> Availability</h3>
+                           <p id="availability-display">Set your working hours so customers know when to reach you.</p> <button id="set-hours-btn" class="btn-secondary full-width"><i class="fas fa-clock"></i> Set Hours</button> </div>
+
+
+                     <div class="section-card">
+                           <h3><i class="fas fa-cog"></i> Account</h3>
+                           <a href="account-settings.html" class="btn-secondary full-width"><i class="fas fa-user-cog"></i> Account Settings</a>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="availability-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="availability-close-btn">&times;</span>
+            <form id="availability-form" class="availability-form">
+                <h2>Set Weekly Availability</h2>
+
+                <div class="day-row" data-day="monday">
+                    <label for="monday-available">Monday</label>
+                    <div class="time-inputs"> <input type="time" id="monday-start" value="09:00">
+                        <input type="time" id="monday-end" value="17:00">
+                    </div>
+                    <input type="checkbox" id="monday-available" checked>
+                </div>
+                <div class="day-row" data-day="tuesday">
+                    <label for="tuesday-available">Tuesday</label>
+                     <div class="time-inputs">
+                        <input type="time" id="tuesday-start" value="09:00">
+                        <input type="time" id="tuesday-end" value="17:00">
+                    </div>
+                    <input type="checkbox" id="tuesday-available" checked>
+                </div>
+                <div class="day-row" data-day="wednesday">
+                    <label for="wednesday-available">Wednesday</label>
+                     <div class="time-inputs">
+                        <input type="time" id="wednesday-start" value="09:00">
+                        <input type="time" id="wednesday-end" value="17:00">
+                    </div>
+                    <input type="checkbox" id="wednesday-available" checked>
+                </div>
+                 <div class="day-row" data-day="thursday">
+                    <label for="thursday-available">Thursday</label>
+                     <div class="time-inputs">
+                        <input type="time" id="thursday-start" value="09:00">
+                        <input type="time" id="thursday-end" value="17:00">
+                    </div>
+                    <input type="checkbox" id="thursday-available" checked>
+                </div>
+                 <div class="day-row" data-day="friday">
+                    <label for="friday-available">Friday</label>
+                     <div class="time-inputs">
+                        <input type="time" id="friday-start" value="09:00">
+                        <input type="time" id="friday-end" value="17:00">
+                    </div>
+                    <input type="checkbox" id="friday-available" checked>
+                </div>
+                 <div class="day-row" data-day="saturday">
+                    <label for="saturday-available">Saturday</label>
+                     <div class="time-inputs">
+                        <input type="time" id="saturday-start" value="10:00">
+                        <input type="time" id="saturday-end" value="14:00">
+                    </div>
+                    <input type="checkbox" id="saturday-available">
+                </div>
+                 <div class="day-row" data-day="sunday">
+                    <label for="sunday-available">Sunday</label>
+                     <div class="time-inputs">
+                        <input type="time" id="sunday-start" value="10:00">
+                        <input type="time" id="sunday-end" value="14:00">
+                    </div>
+                    <input type="checkbox" id="sunday-available">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="availability-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary" id="save-availability-btn"><i class="fas fa-save"></i> Save Hours</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="module" src="auth-status.js"></script>
+    <script src="theme.js"></script>
+    <script type="module">
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
+
+        // --- Elements ---
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const unauthorizedMessage = document.getElementById('unauthorized-message');
+        const dashboardContent = document.getElementById('dashboard-content');
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const logoUploadInput = document.getElementById('logoUpload');
+        const portfolioGrid = document.getElementById('portfolio-grid');
+        const portfolioUploadInput = document.getElementById('portfolio-upload');
+        const uploadPortfolioBtn = document.getElementById('upload-portfolio-btn');
+        const availabilityDisplay = document.getElementById('availability-display'); // Display P tag
+        const portfolioCountSpan = document.getElementById('portfolio-count'); // NEW: Count display
+        const portfolioUpgradePrompt = document.getElementById('portfolio-upgrade-prompt'); // NEW: Upgrade message
+        // Add near other element references
+        const skillsDisplayDiv = document.getElementById('skills-display');
+        const skillsEditInput = document.getElementById('skills-edit');
+
+        // Availability Modal Elements
+        const availabilityModal = document.getElementById('availability-modal');
+        const setHoursBtn = document.getElementById('set-hours-btn');
+        const availabilityCloseBtn = document.getElementById('availability-close-btn');
+        const availabilityCancelBtn = document.getElementById('availability-cancel-btn');
+        const availabilityForm = document.getElementById('availability-form');
+
+        // Display Elements
+        const elements = {
+            name: document.getElementById('provider-name'),
+            serviceType: document.getElementById('provider-service-type'),
+            description: document.getElementById('provider-description'),
+            phone: document.getElementById('provider-phone'),
+            email: document.getElementById('provider-email'),
+            location: document.getElementById('provider-location'),
+            logo: document.getElementById('provider-logo')
+        };
+
+        // Input Elements
+        const editInputs = {
+            name: document.getElementById('provider-name-edit'),
+            serviceType: document.getElementById('provider-service-type-edit'),
+            description: document.getElementById('provider-description-edit'),
+            phone: document.getElementById('provider-phone-edit'),
+            location: document.getElementById('provider-location-edit'),
+        };
+
+        let currentUserId = null;
+        let currentUserData = {};
+        const freePortfolioLimit = 5; // NEW: Define the free limit
+
+        // --- AVAILABILITY MODAL FUNCTIONS ---
+        // (Keep existing availability functions - open, close, load, save, updateDisplay)
+        function openAvailabilityModal() {
+            loadAvailability();
+            availabilityModal.classList.add('open');
+            availabilityModal.style.display = 'flex';
+        }
+        function closeAvailabilityModal() {
+            availabilityModal.classList.remove('open');
+            setTimeout(() => { availabilityModal.style.display = 'none'; }, 300);
+        }
+        function loadAvailability() {
+            const availability = currentUserData?.availability;
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+             if (!availability) {
+                 console.log("No availability data found, using modal defaults.");
+                 days.forEach(day => {
+                     const availableCheckbox = document.getElementById(`${day}-available`);
+                     const startInput = document.getElementById(`${day}-start`);
+                     const endInput = document.getElementById(`${day}-end`);
+                     const isWeekend = day === 'saturday' || day === 'sunday';
+                     availableCheckbox.checked = !isWeekend;
+                     startInput.value = isWeekend ? '10:00' : '09:00';
+                     endInput.value = isWeekend ? '14:00' : '17:00';
+                 });
+                 return;
+            }
+            days.forEach(day => {
+                const dayData = availability[day];
+                const availableCheckbox = document.getElementById(`${day}-available`);
+                const startInput = document.getElementById(`${day}-start`);
+                const endInput = document.getElementById(`${day}-end`);
+                if (dayData && typeof dayData === 'object') {
+                    availableCheckbox.checked = dayData.available || false;
+                    startInput.value = dayData.start || '09:00';
+                    endInput.value = dayData.end || '17:00';
+                } else {
+                     availableCheckbox.checked = false;
+                     startInput.value = '09:00';
+                     endInput.value = '17:00';
+                }
+            });
+        }
+        async function saveAvailability(e) {
+            e.preventDefault();
+            if (!currentUserId) return;
+            const availabilityData = {};
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            days.forEach(day => {
+                const available = document.getElementById(`${day}-available`).checked;
+                const start = document.getElementById(`${day}-start`).value;
+                const end = document.getElementById(`${day}-end`).value;
+                availabilityData[day] = { available, start, end };
+            });
+            try {
+                const userDocRef = doc(db, "users", currentUserId);
+                await updateDoc(userDocRef, { availability: availabilityData });
+                currentUserData = { ...currentUserData, availability: availabilityData };
+                updateAvailabilityDisplay();
+                closeAvailabilityModal();
+                console.log("Availability updated successfully.");
+            } catch (error) {
+                console.error("Error updating availability:", error);
+                console.log("Could not save availability. Please try again.");
+            }
+        }
+
+        // --- Function to Display Skill Tags ---
+        function updateSkillsDisplay() {
+            skillsDisplayDiv.innerHTML = ''; // Clear existing tags/placeholder
+            const tags = currentUserData?.skillTags || []; // Get tags array or empty array
+
+            if (tags.length === 0) {
+                skillsDisplayDiv.innerHTML = '<p style="color: var(--text-light);">Add specific skills customers might search for (e.g., geyser repair, matric maths).</p>';
+            } else {
+                tags.forEach(tag => {
+                    if (tag.trim()) { // Ensure tag isn't just whitespace
+                        const tagElement = document.createElement('span');
+                        tagElement.className = 'skill-tag';
+                        tagElement.textContent = tag.trim();
+                        skillsDisplayDiv.appendChild(tagElement);
+                    }
+                });
+            }
+        }
+        function updateAvailabilityDisplay() {
+            if (!currentUserData || !currentUserData.availability) {
+                availabilityDisplay.textContent = "Availability not set. Click 'Set Hours'."; return;
+            }
+            const availability = currentUserData.availability;
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            let summary = [];
+            days.forEach(day => {
+                 if (availability[day]?.available === true) {
+                     const start = availability[day].start || 'N/A';
+                     const end = availability[day].end || 'N/A';
+                     const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+                     summary.push(`${dayName}: ${start} - ${end}`);
+                 }
+            });
+            availabilityDisplay.innerHTML = summary.length > 0 ? summary.join('<br>') : "Set to unavailable all week.";
+        }
+
+        // Attach listeners for Availability modal
+        setHoursBtn.addEventListener('click', openAvailabilityModal);
+        availabilityCloseBtn.addEventListener('click', closeAvailabilityModal);
+        availabilityCancelBtn.addEventListener('click', closeAvailabilityModal);
+        availabilityForm.addEventListener('submit', saveAvailability);
+
+
+        // --- Role Check and Initial Data Load ---
+        async function checkAndRender(user) {
+            if (!user) { window.location.href = "auth.html"; return; }
+            currentUserId = user.uid;
+            const userDocRef = doc(db, "users", currentUserId);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (!userDocSnap.exists()) {
+                console.error("User profile document not found!");
+                 loadingSpinner.style.display = 'none';
+                 unauthorizedMessage.querySelector('p').textContent = 'Your profile data could not be found. Please contact support or try signing up again.';
+                 unauthorizedMessage.style.display = 'block';
+                return;
+            }
+
+            currentUserData = userDocSnap.data();
+            const userRole = currentUserData.role;
+
+            if (userRole === 'Service Provider') {
+                loadingSpinner.style.display = 'none';
+                dashboardContent.style.display = 'block';
+                unauthorizedMessage.style.display = 'none';
+                try {
+                    localStorage.setItem('userRole', userRole);
+                    localStorage.setItem('userName', currentUserData.fullName || user.displayName);
+                    // --- Load and Display Skills/Tags ---
+                    updateSkillsDisplay(); // Call new function to display tags
+                    // --- End Load Skills/Tags ---
+
+                    loadPortfolio(); // Load portfolio and check limit
+                    updateAvailabilityDisplay();
+                    updateRatesDisplay(); // Keep this if you implemented rates
+                } catch (e) { console.error("Error saving role/name to localStorage:", e); }
+
+                elements.name.textContent = currentUserData.fullName || 'Your Service Name';
+                elements.serviceType.textContent = `Service Type: ${currentUserData.serviceType || 'Not Set'}`;
+                elements.description.textContent = currentUserData.description || currentUserData.aboutService || 'Add a description of your service.';
+                elements.phone.textContent = currentUserData.phone || 'Add your phone number';
+                elements.email.textContent = currentUserData.email || user.email;
+                elements.location.textContent = currentUserData.location || currentUserData.serviceLocation || 'Add your primary service area';
+
+                const localLogo = localStorage.getItem(`businessLogo_${currentUserId}`);
+                elements.logo.src = localLogo || 'default-profile-picture.png'; // Use a default business logo if needed
+
+                loadPortfolio(); // Load portfolio and check limit
+                updateAvailabilityDisplay();
+
+            } else {
+                loadingSpinner.style.display = 'none';
+                dashboardContent.style.display = 'none';
+                unauthorizedMessage.style.display = 'block';
+            }
+        }
+
+        // --- Edit/Save Profile Logic (Keep existing) ---
+        editProfileBtn.addEventListener('click', async () => {
+             const isEditMode = dashboardContent.classList.contains('edit-mode-active');
+            if (isEditMode) {
+                const skillsArray = skillsEditInput.value.split(',') // Split by comma
+                               .map(skill => skill.trim()) // Trim whitespace from each skill
+                               .filter(skill => skill); // Remove any empty strings
+                const updatedData = {
+                    fullName: editInputs.name.value, serviceType: editInputs.serviceType.value,
+                    description: editInputs.description.value, phone: editInputs.phone.value,
+                    location: editInputs.location.value,
+                    skillTags: skillsArray
+                    
+                };
+                
+                
+                try {
+                    await updateDoc(doc(db, "users", currentUserId), updatedData);
+                    currentUserData = {...currentUserData, ...updatedData};
+                    elements.name.textContent = updatedData.fullName;
+                    elements.serviceType.textContent = `Service Type: ${updatedData.serviceType}`;
+                    elements.description.textContent = updatedData.description;
+                    elements.phone.textContent = updatedData.phone;
+                    elements.location.textContent = updatedData.location;
+                    localStorage.setItem('userName', updatedData.fullName);
+                    window.dispatchEvent(new CustomEvent('storage:nameUpdate'));
+                    dashboardContent.classList.remove('edit-mode-active');
+                    editProfileBtn.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit Info';
+                    editProfileBtn.classList.remove('btn-primary'); editProfileBtn.classList.add('btn-secondary');
+                    await updateDoc(doc(db, "users", currentUserId), updatedData);
+                    currentUserData = {...currentUserData, ...updatedData}; // Update local cache including tags
+
+                    // ... (update display elements for name, serviceType, etc.) ...
+                    elements.location.textContent = updatedData.location;
+
+                    // Update skills display
+                    updateSkillsDisplay(); // Call function to re-render tags
+                    
+                } catch (error) {
+                    console.error("Error updating service provider profile:", error); console.log("Could not save changes.");
+                }
+            } else {
+                editInputs.name.value = currentUserData.fullName || '';
+                editInputs.serviceType.value = currentUserData.serviceType || '';
+                editInputs.description.value = currentUserData.description || currentUserData.aboutService || '';
+                editInputs.phone.value = currentUserData.phone || '';
+                editInputs.location.value = currentUserData.location || currentUserData.serviceLocation || '';
+                dashboardContent.classList.add('edit-mode-active');
+                editProfileBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                editProfileBtn.classList.remove('btn-secondary'); editProfileBtn.classList.add('btn-primary');
+                // --- ENTER EDIT MODE ---
+                editInputs.name.value = currentUserData.fullName || '';
+                // ... (populate other inputs) ...
+                editInputs.location.value = currentUserData.location || currentUserData.serviceLocation || '';
+
+                // Add this line to populate skills input
+                skillsEditInput.value = (currentUserData?.skillTags || []).join(', '); // Join array with commas for editing
+
+                dashboardContent.classList.add('edit-mode-active');
+                // ... (rest of the edit mode code) ...
+            }
+        });
+
+        // --- Logo Upload Logic (Keep existing) ---
+        logoUploadInput.addEventListener('change', function(event) {
+             if (!currentUserId) return;
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    elements.logo.src = base64Image;
+                    try {
+                        const imageKey = `businessLogo_${currentUserId}`;
+                        localStorage.setItem(imageKey, base64Image);
+                        window.dispatchEvent(new CustomEvent('storage:logoUpdate', { detail: { key: imageKey, value: base64Image } }));
+                    } catch (error) {
+                        console.error("Error saving logo to localStorage:", error); console.log("Could not save logo.");
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+         // --- PORTFOLIO FUNCTIONS (UPDATED for Freemium) ---
+        function getPortfolioKey(userId) {
+            return `portfolio_${userId}`;
+        }
+
+        // UPDATED loadPortfolio to check and enforce limit
+        function loadPortfolio() {
+            if (!currentUserId) return;
+            const savedPortfolio = localStorage.getItem(getPortfolioKey(currentUserId));
+            let portfolio = [];
+            try {
+                portfolio = JSON.parse(savedPortfolio) || [];
+            } catch (e) { console.error("Error parsing portfolio data:", e); portfolio = []; }
+
+            portfolioGrid.innerHTML = ''; // Clear existing grid
+            const currentCount = portfolio.length;
+
+            if (currentCount === 0) {
+                 portfolioGrid.innerHTML = '<p style="color: var(--text-light); grid-column: 1 / -1;">Upload images of your work to showcase your skills.</p>';
+            } else {
+                portfolio.forEach((imgDataUrl, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'portfolio-item';
+                    item.innerHTML = `
+                        <img src="${imgDataUrl}" alt="Portfolio Image ${index + 1}">
+                        <button class="delete-img-btn" data-index="${index}"><i class="fas fa-times"></i></button>
+                    `;
+                    portfolioGrid.appendChild(item);
+                });
+                // Attach delete listeners
+                portfolioGrid.querySelectorAll('.delete-img-btn').forEach(btn => {
+                    btn.addEventListener('click', deletePortfolioImage);
+                });
+            }
+
+            // --- Freemium Logic ---
+            portfolioCountSpan.textContent = `(${currentCount}/${freePortfolioLimit} Free Uploads)`;
+            if (currentCount >= freePortfolioLimit) {
+                uploadPortfolioBtn.disabled = true; // Disable button
+                portfolioUpgradePrompt.style.display = 'block'; // Show upgrade message
+            } else {
+                uploadPortfolioBtn.disabled = false; // Enable button
+                portfolioUpgradePrompt.style.display = 'none'; // Hide upgrade message
+            }
+            // --- End Freemium Logic ---
+        }
+
+        function savePortfolio(portfolio) {
+             if (!currentUserId) return;
+            try {
+                 localStorage.setItem(getPortfolioKey(currentUserId), JSON.stringify(portfolio));
+                 loadPortfolio(); // Refresh display AND re-check limit
+             } catch (error) {
+                 console.error("Error saving portfolio to localStorage:", error);
+                 console.log("Could not save portfolio changes.");
+             }
+        }
+
+        // UPDATED addPortfolioImages to respect limit
+        function addPortfolioImages(files) {
+            if (!currentUserId || !files || files.length === 0) return;
+
+            const savedPortfolio = localStorage.getItem(getPortfolioKey(currentUserId));
+            let portfolio = [];
+            try { portfolio = JSON.parse(savedPortfolio) || []; } catch (e) { portfolio = []; }
+
+            const currentCount = portfolio.length;
+            const canUploadCount = freePortfolioLimit - currentCount;
+
+            if (canUploadCount <= 0) {
+                 console.log("Upload limit reached. Upgrade for more.");
+                 // Optionally show a more prominent message to the user here
+                 return; // Stop if limit is already reached
+            }
+
+            let filesProcessed = 0;
+            // Only process files up to the limit
+            const filesToProcess = Array.from(files).slice(0, canUploadCount);
+            const totalFiles = filesToProcess.length;
+            const newImages = [];
+
+            if (files.length > canUploadCount) {
+                 console.log(`Limit reached. Uploading only ${canUploadCount} of ${files.length} selected images.`);
+                 // Optionally inform the user
+            }
+
+            filesToProcess.forEach(file => {
+                 if (file.size > 2 * 1024 * 1024) { // Basic size check (e.g., 2MB)
+                     console.warn(`Skipping large file: ${file.name}`); filesProcessed++;
+                     if (filesProcessed === totalFiles) { savePortfolio([...portfolio, ...newImages]); } return;
+                 }
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        newImages.push(event.target.result); filesProcessed++;
+                        if (filesProcessed === totalFiles) { savePortfolio([...portfolio, ...newImages]); }
+                    };
+                     reader.onerror = (error) => {
+                         console.error("Error reading file:", file.name, error); filesProcessed++;
+                         if (filesProcessed === totalFiles) { savePortfolio([...portfolio, ...newImages]); }
+                     };
+                    reader.readAsDataURL(file);
+                } else {
+                     console.warn("Skipping non-image file:", file.name); filesProcessed++;
+                     if (filesProcessed === totalFiles) { savePortfolio([...portfolio, ...newImages]); }
+                }
+            });
+        }
+
+
+        function deletePortfolioImage(e) {
+            const index = parseInt(e.currentTarget.dataset.index);
+            const savedPortfolio = localStorage.getItem(getPortfolioKey(currentUserId));
+            let portfolio = [];
+            try { portfolio = JSON.parse(savedPortfolio) || []; } catch (e) { portfolio = []; }
+
+            if (index > -1 && index < portfolio.length) {
+                portfolio.splice(index, 1);
+                savePortfolio(portfolio); // savePortfolio calls loadPortfolio which re-checks limit
+            }
+        }
+
+        uploadPortfolioBtn.addEventListener('click', () => {
+            portfolioUploadInput.click();
+        });
+
+        portfolioUploadInput.addEventListener('change', (e) => {
+            addPortfolioImages(e.target.files);
+            e.target.value = ''; // Reset file input
+        });
+
+
+        // --- Initialize Auth Listener ---
+        onAuthStateChanged(auth, (user) => {
+             loadingSpinner.style.display = 'block'; // Show spinner initially
+             dashboardContent.style.display = 'none';
+             unauthorizedMessage.style.display = 'none';
+            if (user) {
+                checkAndRender(user);
+            } else {
+                window.location.href = "auth.html"; // Redirect if not logged in
+            }
+        });
+    </script>
+</body>
+</html>
