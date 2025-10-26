@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasi Hustle - Connect with Township Talent</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Chat Page Styles --- */
+        .chat-page-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            z-index: 2000;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+
+        .chat-page-container.active {
+            display: flex;
+            transform: translateX(0);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .chat-back-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .chat-provider-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .chat-provider-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Allows info to take available space */
+        }
+        
+        .chat-provider-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chat-provider-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-indicator.online { background-color: #2ecc71; } /* Green */
+        .status-indicator.idle { background-color: #f39c12; } /* Orange */
+        .status-indicator.offline { background-color: #95a5a6; } /* Grey */
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 75%;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message p {
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin: 0;
+            line-height: 1.5;
+        }
+        .message p.has-image {
+            padding: 5px;
+            background-color: transparent !important;
+            border: none !important;
+        }
+        .message .chat-image {
+            max-width: 100%;
+            border-radius: 15px;
+            display: block;
+            max-height: 200px;
+        }
+        .message-time {
+             font-size: 0.75rem;
+             color: var(--text-light);
+             margin-top: 5px;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .message.sent p:not(.has-image) {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-bottom-right-radius: 5px;
+        }
+        
+        /* NEW: Ensure sent message cards don't use default padding */
+        .message.sent .contract-request-card {
+            padding: 0;
+            background-color: transparent;
+            border: none;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+        .message.received p {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 5px;
+        }
+
+
+        .chat-input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            gap: 10px;
+            align-items: center;
+        }
+
+        #chat-message-input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+        }
+        #chat-message-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .chat-action-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #chat-upload-btn {
+            background-color: var(--surface-color);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        #chat-upload-btn:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+        
+        #chat-send-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        #chat-send-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* --- Styles for "How It Works" Tabs --- */
+        .how-it-works-tabs {
+            display: grid; /* CHANGED from flex */
+            grid-template-columns: 1fr 1fr; /* ADDED: Two equal columns */
+            gap: 15px;
+            margin: 20px auto 0; /* UPDATED: Center the grid */
+            max-width: 500px; /* ADDED: Constrain the width */
+        }
+        .tab-link {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-light);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%; /* ADDED: Make button fill its grid cell */
+            box-sizing: border-box; /* ADDED: Ensure padding is included */
+            text-align: center; /* ADDED: Center the text */
+        }
+        .tab-link:hover {
+            background-color: var(--background-color);
+            border-color: var(--secondary-color);
+        }
+        .tab-link.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- Styles for "For Providers" CTA Section --- */
+        .for-providers-section {
+            background-color: var(--surface-color);
+        }
+        .provider-cta-content {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        .provider-cta-text {
+            flex: 1;
+        }
+        .provider-cta-text h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .provider-cta-text p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 25px;
+        }
+        .provider-cta-text ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+        .provider-cta-text li {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .provider-cta-text li i {
+            color: var(--primary-color);
+        }
+        .btn-provider-cta {
+            font-size: 1.1rem;
+            padding: 15px 30px;
+        }
+
+        .provider-cta-image {
+            flex: 1;
+            display: none; /* Hide on mobile by default */
+        }
+        .provider-cta-image img {
+            width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+        }
+        
+        @media (min-width: 768px) {
+            .provider-cta-image {
+                display: block; /* Show image on desktop */
+            }
+        }
+        @media (max-width: 768px) {
+             .provider-cta-content {
+                flex-direction: column;
+             }
+        }
+
+        /* --- NEW: Button for Modal in Header --- */
+        #open-contract-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        #open-contract-btn:hover {
+            background-color: var(--background-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+         #open-contract-btn i {
+            margin-right: 6px;
+         }
+
+        /* --- NEW: Modal Styles --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; 
+            z-index: 3000; /* Sit on top of chat */
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            margin: 5% auto; /* Reduced top margin */
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--text-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal h2 {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+        }
+        
+        .form-group input[readonly] {
+            background-color: #eee;
+            color: #777;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+        }
+        
+        /* --- NEW: Styles for Location Button --- */
+        .form-group .input-with-button {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .form-group .input-with-button input {
+            flex-grow: 1; /* Input takes remaining space */
+            width: auto; /* Override default 100% width */
+        }
+
+        .btn-location {
+            flex-shrink: 0;
+            padding: 10px 12px;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-color);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        .btn-location:hover {
+            background-color: #eee;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-location:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .btn-location .fa-spinner {
+            animation: fa-spin 1.5s linear infinite;
+        }
+        @keyframes fa-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* --- NEW: Input Group for Budget --- */
+        .input-group {
+            display: flex;
+            width: 100%;
+        }
+
+        .input-group-addon {
+            padding: 10px 12px;
+            font-weight: 500;
+            color: var(--text-light);
+            background-color: #eee;
+            border: 1px solid var(--border-color);
+            border-right: none;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+        }
+
+        .input-group input {
+            flex-grow: 1;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            width: auto; 
+        }
+        
+        .input-group input:focus {
+            z-index: 2; /* Ensure focus outline appears over addon */
+            position: relative;
+        }
+        
+        /* --- NEW: Image Preview Styles (Modal) --- */
+        #image-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 10px;
+        }
+        #image-preview {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+        #file-name {
+            font-style: italic;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #remove-image-btn {
+            background: none;
+            border: none;
+            color: #e74c3c; /* Reddish */
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0;
+            line-height: 1;
+        }
+        #remove-image-btn:hover {
+            color: #c0392b; /* Darker red */
+        }
+        
+        /* --- NEW: Contract Card Styles (Chat) --- */
+        .contract-request-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 15px;
+            width: 280px; /* Fixed width for the card */
+            color: var(--text-color); /* Override .sent p color */
+        }
+        .message.sent .contract-request-card {
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-bottom-right-radius: 5px; /* Match sent bubble style */
+        }
+        .contract-request-card h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .contract-image-preview {
+            width: 100%;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .contract-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .contract-buttons button {
+            flex-grow: 1;
+            padding: 8px 10px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-view-request {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        .btn-view-request:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-edit-request {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        .btn-edit-request:hover {
+            background-color: #eee;
+        }
+        
+        .btn-contract {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 12px 18px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-contract:hover {
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body style="font-size: 15px;">
+    <nav class="navbar" style="font-size: medium;">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="index.html">Kasi Hustle</a></h2>
+            </div>
+            <div class="nav-menu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#stories" class="nav-link">Stories</a>
+                <a href="#contact" class="nav-link">Contact</a>
+               <div id="auth-container" class="waiting-auth">
+                    <a href="auth.html" class="nav-link btn-auth">Sign Up / Login</a>
+                </div>
+                 <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <video autoplay loop muted playsinline class="hero-background-video">
+        <source src="11393424-uhd_3840_2160_24fps.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+        </video>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Connect with Township<br>Talent</h1>
+                <p class="hero-description">
+                    Find skilled service providers in your community. From plumbers to painters, tutors to technicians. Discover the hustle that drives our townships.
+                </p>
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <div class="search-input-group">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" placeholder="What service do you need?" class="search-input">
+                    </div>
+                    <div class="location-input-group">
+                        <i class="fas fa-map-marker-alt location-icon"></i>
+                        <input type="text" placeholder="Where in your township?" class="location-input">
+                    </div>
+                    <button class="search-btn">Search Now</button>
+                </div>
+                <div class="popular-searches">
+                    <div class="popular-tags">
+                        <div class="popular-searches">
+                            <div class="popular-tags">
+                                <button class="tag">Plumbing</button>
+                                <button class="tag">Painting</button>
+                                <button class="tag">Tutoring</button>
+                                <button class="tag">Cleaning</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="featured-providers">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Service Providers</h2>
+                <p>Meet some of our top-rated professionals making a difference.</p>
+            </div>
+            <div class="providers-grid">
+                <div class="provider-card" data-status="online">
+                    <div class="provider-image">
+                        <img class="provider-photo" src="austine.jpg" loading="lazy" alt="Austine Mongwe profile photo">
+                        <div class="verified-badge"><i class="fas fa-check"></i> Verified</div>
+                    </div>
+                    <div class="provider-info">
+                        <h3>Austine Mongwe</h3>
+                        <p class="provider-service">Plumbing & Home Repairs</p>
+                        <div class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve Block LL</div>
+                        <div class="provider-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text">4.9 (127 reviews)</span>
+                        </div>
+                        <div class="provider-actions">
+                            <a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a>
+                            <a href="provider-profile.html" class="btn-profile">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="provider-card" data-status="idle">
+                    <div class="provider-image">
+                        <img class="provider-photo" src="ole.jpg" loading="lazy" alt="Olerato Monye profile photo">
+                         <div class="verified-badge"><i class="fas fa-check"></i> Verified</div>
+                    </div>
+                    <div class="provider-info">
+                        <h3>Olerato Monye</h3>
+                        <p class="provider-service">Beauty & Make-up</p>
+                        <div class="provider-location"><i class="fas fa-map-marker-alt"></i> Soshanguve Block VV</div>
+                        <div class="provider-rating">
+                           <div class="stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-text">5.0 (89 reviews)</span>
+                        </div>
+                        <div class="provider-actions">
+                            <a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a>
+                            <a href="provider2-profile.html" class="btn-profile">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+                 <div class="provider-card" data-status="offline">
+                    <div class="provider-image">
+                        <img class="provider-photo" src="lethabo.jpg" alt="Lethabo Phoshoko profile photo">
+                         <div class="verified-badge"><i class="fas fa-check"></i> Verified</div>
+                    </div>
+                    <div class="provider-info">
+                        <h3>Lethabo Phoshoko</h3>
+                        <p class="provider-service">Tailor, Photographer & Event Organiser</p>
+                        <div class="provider-location"><i class="fas fa-map-marker-alt"></i>Soshanguve Block YY</div>
+                        <div class="provider-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text">4.8 (156 reviews)</span>
+                        </div>
+                        <div class="provider-actions">
+                           <a href="#" class="btn-contact"><i class="fas fa-comment-dots"></i> Message</a>
+                            <a href="provider3-profile.html" class="btn-profile">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>How Kasi Hustle Works</h2>
+                <p>Connecting communities through skills. Select your view:</p>
+                <div class="how-it-works-tabs">
+                    <button class="tab-link active" data-tab="customer-view">For Customers</button>
+                    <button class="tab-link" data-tab="provider-view">For Service Providers</button>
+                </div>
+            </div>
+
+            <div id="customer-view" class="tab-content active">
+                <div class="steps-container">
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-search"></i></div>
+                        <h3>1. Search & Discover</h3>
+                        <p>Use our filters to find exactly what you need by service, location, price, and ratings.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-comments"></i></div>
+                        <h3>2. Connect & Chat</h3>
+                        <p>Use our secure chat to discuss project details, timelines, and get quotes directly.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-handshake"></i></div>
+                        <h3>3. Get It Done</h3>
+                        <p>Hire with confidence. Our platform ensures clear communication until the job is complete.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-star"></i></div>
+                        <h3>4. Rate & Review</h3>
+                        <p>Share your experience to help others in the community find trustworthy service providers.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="provider-view" class="tab-content">
+                <div class="steps-container">
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-id-card"></i></div>
+                        <h3>1. Create Your Profile</h3>
+                        <p>Sign up as a Service Provider and build your professional page in minutes.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-camera-retro"></i></div>
+                        <h3>2. Showcase Your Work</h3>
+                        <p>Upload a portfolio of your best work to show customers what you can do.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-comments-dollar"></i></div>
+                        <h3>3. Receive Enquiries</h3>
+                        <p>Get messages directly from local customers who need your skills.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-briefcase"></i></div>
+                        <h3>4. Grow Your Business</h3>
+                        <p>Complete jobs, get great reviews, and build your reputation on Kasi Hustle.</p>
+                    </div>
+                </div>
+            </div>
+            </div>
+    </section>
+
+    <section id="services" class="service-categories">
+        <div class="container">
+            <div class="section-header">
+                <h2>Explore Service Categories</h2>
+                <p>Find the right professional for any job, big or small.</p>
+            </div>
+            <div class="categories-grid">
+                <a href="home-services.html" class="category-card">
+                    <div class="category-icon"><i class="fas fa-tools"></i></div>
+                    <h3>Home Maintenance</h3>
+                    <p>Plumbers, electricians, gardening</p>
+                </a>
+                <a href="education-services.html" class="category-card">
+                    <div class="category-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>Education</h3>
+                    <p>Tutors, skills training</p>
+                </a>
+                <a href="beauty-wellness-services.html" class="category-card">
+                    <div class="category-icon"><i class="fas fa-spa"></i></div>
+                    <h3>Beauty & Wellness</h3>
+                    <p>Hair, nails, fitness</p>
+                </a>
+                <a href="event-services.html" class="category-card">
+                    <div class="category-icon"><i class="fas fa-camera"></i></div>
+                    <h3>Events</h3>
+                    <p>Photography, catering</p>
+                </a>
+                <a href="car-maintenence-services.html" class="category-card">
+                    <div class="category-icon"><i class="fas fa-car"></i></div>
+                    <h3>Car Maintenance</h3>
+                    <p>Mechanics, car wash</p>
+                </a>
+                 <a href="creative-services.html" class="category-card">
+                    <div class="category-icon"><i class="fas fa-paint-brush"></i></div>
+                    <h3>Creative & Digital</h3>
+                    <p>Printing, drawing/painting</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="for-providers" class="for-providers-section" >
+        <div class="container">
+            <div class="provider-cta-content">
+                <div class="provider-cta-text">
+                    <h2>Grow Your Business with Kasi Hustle</h2>
+                    <p style="font-size: medium;">Are you a skilled professional or run a local service? Join our platform to connect with hundreds of customers in your township.</p>
+                    <ul style="font-size: medium;">
+                        <li><i class="fas fa-check-circle"></i> Create a free professional profile.</li>
+                        <li><i class="fas fa-check-circle"></i> Showcase your work with a portfolio.</li>
+                        <li><i class="fas fa-check-circle"></i> Get discovered by local customers.</li>
+                        <li><i class="fas fa-check-circle"></i> Manage enquiries with our simple chat.</li>
+                    </ul>
+                    <a href="auth.html" class="btn-primary btn-provider-cta" style="font-size: medium;">List Your Service Today</a>
+                </div>
+                <div class="provider-cta-image">
+                    <img src="https://images.pexels.com/photos/13590704/pexels-photo-13590704.jpeg" alt="Service Provider working">
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="stories" class="community-stories">
+         <div class="container">
+            <div class="section-header">
+                <h2>Community Stories</h2>
+                <p>Real experiences from our Kasi Hustle community members.</p>
+            </div>
+            <div class="stories-grid">
+                <div class="story-card">
+                    <div class="story-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <blockquote>"Found an amazing electrician. Quick, fair price, and excellent work. This platform is exactly what our community needed!"</blockquote>
+                    <div class="story-author"><strong>Lerato Mokoena</strong><span>Homeowner, Winteveld</span></div>
+                </div>
+                <div class="story-card">
+                    <div class="story-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <blockquote>"As a painter, this platform has connected me with so many new clients. My business has grown 300%!"</blockquote>
+                    <div class="story-author"><strong>Michael Sithole</strong><span>Small Business Owner, Mabopane</span></div>
+                </div>
+                <div class="story-card">
+                    <div class="story-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <blockquote>"Found the perfect math tutor for my daughter. Her grades improved dramatically. Highly recommend!"</blockquote>
+                    <div class="story-author"><strong>Grace Nkomo</strong><span>Parent, Soshanguve</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Kasi Hustle</h3>
+                    <p>Connecting communities, empowering local talent, and building stronger neighborhoods.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Popular Services</h4>
+                    <ul>
+                        <li><a href="#">Home Repairs</a></li>
+                        <li><a href="#">Tutoring</a></li>
+                        <li><a href="#">Beauty Services</a></li>
+                        <li><a href="#">Catering</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">How It Works</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                 <div class="footer-section">
+                    <h4>Contact Us</h4>
+                     <div class="contact-info">
+                        <p><i class="fas fa-phone"></i> <a href="tel:+27824618978">+27 82 461 8978</a></tran>
+                        <p><i class="fas fa-envelope"></i> <a href="mailto:thekasihustle@gmail.com">thekasihustle@gmail.com</a></p>
+                        <p><i class="fas fa-map-marker-alt"></i> Pretoria, South Africa</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Kasi Hustle. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="chat-page" class="chat-page-container">
+        <div class="chat-header">
+            <button id="chat-back-btn" class="chat-back-btn"><i class="fas fa-arrow-left"></i></button>
+            <img id="chat-provider-avatar" src="" alt="Provider Avatar" class="chat-provider-avatar">
+            <div class="chat-provider-info">
+                <h3 id="chat-provider-name" class="chat-provider-name"></h3>
+                <div id="chat-provider-status" class="chat-provider-status">
+                    <span class="status-indicator"></span>
+                    <span class="status-text"></span>
+                </div>
+            </div>
+            <button id="open-contract-btn" title="Generate Contract">
+                <i class="fas fa-file-contract"></i> Contract
+            </button>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+             <div class="message received">
+                <p>Hi there! How can I help you today?</p>
+                <span class="message-time">10:30 AM</span>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="file" id="chat-image-input" accept="image/*" style="display: none;">
+            <button id="chat-upload-btn" class="chat-action-btn"><i class="fas fa-paperclip"></i></button>
+            <input type="text" id="chat-message-input" placeholder="Type a message...">
+            <button id="chat-send-btn" class="chat-action-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div id="contractModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal-btn">&times;</span>
+            <h2>Generate Service Contract</h2>
+            <form id="contractForm">
+                
+                <div class="form-group">
+                    <label for="providerName">Service Provider</label>
+                    <input type="text" id="providerName" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="serviceType">Service Type</label>
+                    <input type="text" id="serviceType" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="scope">Scope of Work *</label>
+                    <textarea id="scope" rows="4" required placeholder="Describe the work to be done in detail..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Add an Image (Optional)</label>
+                    <input type="file" id="contract-image-input" accept="image/*" style="display: none;">
+                    <button type="button" id="upload-image-btn" class="btn-location" style="width: 100%;">
+                        <i class="fas fa-camera"></i> Choose Image
+                    </button>
+                    <div id="image-preview-container" style="display: none;">
+                        <img id="image-preview" src="" alt="Image Preview">
+                        <span id="file-name"></span>
+                        <button type="button" id="remove-image-btn" title="Remove Image">&times;</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="budget">Budget *</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">R</span>
+                        <input type="text" id="budget" required placeholder="e.g., 2500">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <div class="input-with-button">
+                        <input type="text" id="location" placeholder="e.g., Soweto, Alexandra">
+                        <button type="button" id="get-location-btn" class="btn-location" title="Use current location">
+                            <i class="fas fa-map-marker-alt"></i> Use Current Location
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Contract Languages *</label>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="eng_Latn" checked> English
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="zul_Latn"> isiZulu
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="afr_Latn"> Afrikaans
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="xho_Latn"> isiXhosa
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-contract" style="margin-top: 1rem;">
+                    <i class="fas fa-magic"></i> Generate Multilingual Contract
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+    <script type="module" src="auth-status.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Chat Functionality (Existing) ---
+            const chatPage = document.getElementById('chat-page');
+            const messageButtons = document.querySelectorAll('.btn-contact');
+            const messageButtonsInprofile = document.querySelectorAll('#message');
+            const chatBackButton = document.getElementById('chat-back-btn');
+            const chatProviderAvatar = document.getElementById('chat-provider-avatar');
+            const chatProviderName = document.getElementById('chat-provider-name');
+            const chatProviderStatus = document.getElementById('chat-provider-status');
+            const statusIndicator = chatProviderStatus.querySelector('.status-indicator');
+            const statusText = chatProviderStatus.querySelector('.status-text');
+            const chatMessagesContainer = document.getElementById('chat-messages');
+            const chatMessageInput = document.getElementById('chat-message-input');
+            const chatSendBtn = document.getElementById('chat-send-btn');
+            const chatUploadBtn = document.getElementById('chat-upload-btn');
+            const chatImageInput = document.getElementById('chat-image-input');
+            
+            // --- NEW: Modal Functionality ---
+            const contractModal = document.getElementById('contractModal');
+            const openModalBtn = document.getElementById('open-contract-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const providerNameInput = document.getElementById('providerName');
+            const contractForm = document.getElementById('contractForm');
+            const serviceTypeInput = document.getElementById('serviceType'); // Added this selector
+
+            // --- NEW: Geolocation Elements ---
+            const getLocationBtn = document.getElementById('get-location-btn');
+            const locationInput = document.getElementById('location');
+            
+            // --- NEW: Image Upload Elements ---
+            const uploadImageBtn = document.getElementById('upload-image-btn');
+            const contractImageInput = document.getElementById('contract-image-input');
+            const imagePreviewContainer = document.getElementById('image-preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const fileName = document.getElementById('file-name');
+            const removeImageBtn = document.getElementById('remove-image-btn');
+
+            let uploadedImageData = null; 
+            let currentProviderService = ''; 
+
+            // --- NEW: CHAT STATE MANAGEMENT ---
+            let chatHistories = {}; // Our "database" to store messages per provider
+            let currentChatProvider = null; // Tracks which provider chat is active
+
+            /**
+             * NEW FUNCTION: Renders the chat history for a specific provider
+             */
+            function loadChatHistory(providerName) {
+                // 1. Clear the existing messages from the UI
+                chatMessagesContainer.innerHTML = ''; 
+                
+                // 2. Get the history for this provider (or an empty array if none)
+                const history = chatHistories[providerName] || [];
+
+                // 3. Loop through the history and create the message elements
+                history.forEach(messageData => {
+                    const messageElement = document.createElement('div');
+                    const messageType = messageData.sender === 'user' ? 'sent' : 'received';
+                    messageElement.classList.add('message', messageType);
+
+                    let messageContent = '';
+
+                    // Check message type and build the correct HTML
+                    if (messageData.text) {
+                        // Regular text message
+                        const safeText = messageData.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        messageContent = `<p>${safeText}</p>`;
+                    } else if (messageData.image) {
+                        // Image message
+                        messageContent = `
+                            <p class="has-image">
+                                <img src="${messageData.image}" alt="Uploaded Image" class="chat-image">
+                            </p>`;
+                    } else if (messageData.type === 'contract') {
+                        // Contract card message
+                        let imageHTML = '';
+                        if (messageData.imageData) {
+                            imageHTML = `<img src="${messageData.imageData}" alt="Contract Image" class="contract-image-preview">`;
+                        }
+                        messageContent = `
+                            <div class="contract-request-card">
+                                <h4>Contract Request Sent</h4>
+                                ${imageHTML}
+                                <div class="contract-buttons">
+                                    <button class="btn-view-request">View Request</button>
+                                    <button class="btn-edit-request">Edit Request</button>
+                                </div>
+                            </div>`;
+                    }
+
+                    // Set the final HTML for the message
+                    messageElement.innerHTML = `
+                        ${messageContent}
+                        <span class="message-time">${messageData.time}</span>
+                    `;
+                    chatMessagesContainer.appendChild(messageElement);
+                    
+                    // IMPORTANT: Re-add listeners for contract cards loaded from history
+                    if (messageData.type === 'contract') {
+                        messageElement.querySelector('.btn-view-request').addEventListener('click', () => {
+                            alert('View Request Clicked! (This would show details)');
+                        });
+                        messageElement.querySelector('.btn-edit-request').addEventListener('click', () => {
+                            alert('Edit Request Clicked! (This would re-open the modal)');
+                        });
+                    }
+                });
+
+                // 4. Scroll to the bottom of the newly loaded messages
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+            }
+
+
+            // --- UPDATED: Chat Opening Logic ---
+            messageButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const card = button.closest('.provider-card');
+                    const providerName = card.querySelector('.provider-info h3').textContent;
+                    const providerAvatarSrc = card.querySelector('.provider-photo').src;
+                    const providerStatus = card.dataset.status;
+                    currentProviderService = card.querySelector('.provider-service').textContent; 
+
+                    // --- NEW: Set the active provider ---
+                    currentChatProvider = providerName;
+
+                    chatProviderName.textContent = providerName;
+                    chatProviderAvatar.src = providerAvatarSrc;
+
+                    // Update Status
+                    statusIndicator.className = 'status-indicator'; 
+                    switch (providerStatus) {
+                        case 'online':
+                            statusIndicator.classList.add('online');
+                            statusText.textContent = 'Online';
+                            break;
+                        case 'idle':
+                            statusIndicator.classList.add('idle');
+                            statusText.textContent = 'Away';
+                            break;
+                        default:
+                            statusIndicator.classList.add('offline');
+                            statusText.textContent = 'Offline';
+                    }
+
+                    // --- NEW: Initialize history for this provider if it's their first chat ---
+                    if (!chatHistories[currentChatProvider]) {
+                        chatHistories[currentChatProvider] = [
+                            { 
+                                text: 'Hi there! How can I help you today?', 
+                                sender: 'provider', // This is a "received" message
+                                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+                            }
+                        ];
+                    }
+
+                    // --- NEW: Load the specific chat history ---
+                    loadChatHistory(currentChatProvider);
+
+                    chatPage.classList.add('active');
+                });
+            });
+
+            // --- UPDATED: Close Chat Function ---
+            function closeChat() {
+                chatPage.classList.remove('active');
+                currentChatProvider = null; // Clear the active provider
+                // We NO LONGER clear the messages here
+            }
+
+            // --- UPDATED: Send Message Function ---
+            function sendMessage() {
+                const messageText = chatMessageInput.value.trim();
+                // Check for empty message OR if no chat is active
+                if (messageText === '' || !currentChatProvider) return;
+
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const safeText = messageText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                // 1. Create the data object to save
+                const messageData = {
+                    text: safeText,
+                    sender: 'user',
+                    time: time
+                };
+
+                // 2. Save the message to this provider's history
+                chatHistories[currentChatProvider].push(messageData);
+
+                // 3. Create the element to append to the UI
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'sent');
+                messageElement.innerHTML = `
+                    <p>${safeText}</p>
+                    <span class="message-time">${time}</span>
+                `;
+
+                // 4. Append to UI, scroll, and clear input
+                chatMessagesContainer.appendChild(messageElement);
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+                chatMessageInput.value = '';
+                chatMessageInput.focus();
+            }
+
+            // --- UPDATED: Send Image Function ---
+            function sendImage(imageSrc) {
+                if (!currentChatProvider) return; // Check if a chat is active
+
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // 1. Create data object
+                const messageData = {
+                    image: imageSrc,
+                    sender: 'user',
+                    time: time
+                };
+
+                // 2. Save to this provider's history
+                chatHistories[currentChatProvider].push(messageData);
+
+                // 3. Create DOM element
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'sent');
+                messageElement.innerHTML = `
+                    <p class="has-image">
+                        <img src="${imageSrc}" alt="Uploaded Image" class="chat-image">
+                    </p>
+                    <span class="message-time">${time}</span>
+                `;
+                
+                // 4. Append to UI and scroll
+                chatMessagesContainer.appendChild(messageElement);
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+            }
+
+            chatBackButton.addEventListener('click', closeChat);
+            chatSendBtn.addEventListener('click', sendMessage);
+            chatMessageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            chatUploadBtn.addEventListener('click', () => {
+                chatImageInput.click();
+            });
+
+            chatImageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        sendImage(event.target.result); // This function is now updated
+                    };
+                    reader.readAsDataURL(file);
+                }
+                e.target.value = '';
+            });
+
+            // --- "How It Works" Tab Logic (Unchanged) ---
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const tabId = link.dataset.tab;
+                    tabLinks.forEach(item => item.classList.remove('active'));
+                    tabContents.forEach(item => item.classList.remove('active'));
+                    link.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // --- Modal Logic (Mostly Unchanged) ---
+
+            function openModal() {
+                if (contractModal) {
+                    if (chatProviderName && providerNameInput) {
+                        providerNameInput.value = chatProviderName.textContent;
+                    }
+                    if (serviceTypeInput) {
+                         serviceTypeInput.value = currentProviderService; 
+                    }
+                    contractModal.style.display = 'block';
+                }
+            }
+
+            function closeModal() {
+                if (contractModal) {
+                    contractModal.style.display = 'none';
+                }
+            }
+            
+            function resetImagePreview() {
+                uploadedImageData = null;
+                contractImageInput.value = ''; 
+                imagePreviewContainer.style.display = 'none';
+                imagePreview.src = '';
+                fileName.textContent = '';
+            }
+
+            if (openModalBtn) {
+                openModalBtn.addEventListener('click', openModal);
+            }
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', closeModal);
+            }
+
+            window.addEventListener('click', (event) => {
+                if (event.target == contractModal) {
+                    closeModal();
+                }
+            });
+            
+            if (uploadImageBtn) {
+                uploadImageBtn.addEventListener('click', () => {
+                    contractImageInput.click(); 
+                });
+            }
+            
+            if (contractImageInput) {
+                contractImageInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            uploadedImageData = event.target.result; 
+                            imagePreview.src = uploadedImageData;
+                            fileName.textContent = file.name;
+                            imagePreviewContainer.style.display = 'flex';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            if (removeImageBtn) {
+                removeImageBtn.addEventListener('click', resetImagePreview);
+            }
+
+            
+            // --- UPDATED: Contract Form Submission ---
+            if (contractForm) {
+                contractForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    sendContractCard(); // This function is now updated
+                    closeModal(); 
+                    contractForm.reset();
+                    resetImagePreview(); 
+                });
+            }
+            
+            // --- UPDATED: Send Contract Card Function ---
+            function sendContractCard() {
+                if (!currentChatProvider) return; // Check for active chat
+
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // 1. Create the data object to save
+                const messageData = {
+                    type: 'contract',
+                    sender: 'user',
+                    time: time,
+                    imageData: uploadedImageData // Save the image data from the modal
+                    // We could also save other form details like budget, scope, etc.
+                    // scope: document.getElementById('scope').value,
+                    // budget: document.getElementById('budget').value
+                };
+
+                // 2. Save to this provider's history
+                chatHistories[currentChatProvider].push(messageData);
+
+                // 3. Create the DOM element
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'sent');
+                let imageHTML = '';
+                if (uploadedImageData) {
+                    imageHTML = `<img src="${uploadedImageData}" alt="Contract Image" class="contract-image-preview">`;
+                }
+
+                messageElement.innerHTML = `
+                    <div class="contract-request-card">
+                        <h4>Contract Request Sent</h4>
+                        ${imageHTML}
+                        <div class="contract-buttons">
+                            <button class="btn-view-request">View Request</button>
+                            <button class="btn-edit-request">Edit Request</button>
+                        </div>
+                    </div>
+                    <span class="message-time">${time}</span>
+                `;
+
+                // 4. Append to UI and add listeners
+                chatMessagesContainer.appendChild(messageElement);
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+                
+                messageElement.querySelector('.btn-view-request').addEventListener('click', () => {
+                    alert('View Request Clicked! (This would show details)');
+                });
+                
+                messageElement.querySelector('.btn-edit-request').addEventListener('click', () => {
+                    alert('Edit Request Clicked! (This would re-open the modal)');
+                });
+            }
+            
+            
+            // --- Geolocation Click Listener (Unchanged) ---
+            if (getLocationBtn) {
+                getLocationBtn.addEventListener('click', () => {
+                    if ('geolocation' in navigator) {
+                        getLocationBtn.disabled = true;
+                        getLocationBtn.innerHTML = '<i class="fas fa-spinner"></i> Getting...';
+
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const lat = position.coords.latitude;
+                                const lon = position.coords.longitude;
+                                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data && data.address) {
+                                            const address = data.address;
+                                            const locationString = address.suburb || address.city_district || address.town || address.city || "Unknown Area";
+                                            locationInput.value = locationString;
+                                        } else {
+                                            locationInput.value = `${lat}, ${lon}`;
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error('Reverse geocoding error:', err);
+                                        locationInput.value = `${lat}, ${lon}`;
+                                    })
+                                    .finally(() => {
+                                        getLocationBtn.disabled = false;
+                                        getLocationBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Use Current Location';
+                                    });
+                            },
+                            (error) => {
+                                let errorMsg = "An unknown error occurred.";
+                                // ... (error handling)
+                                alert(errorMsg);
+                                getLocationBtn.disabled = false;
+                                getLocationBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Use Current Location';
+                            }
+                        );
+                    } else {
+                        alert("Geolocation is not supported by your browser.");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

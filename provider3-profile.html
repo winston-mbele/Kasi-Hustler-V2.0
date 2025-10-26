@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lethabo Phoshoko - Tailor - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+    <div class="nav-container">
+         <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="services.html" class="nav-link">Find Services</a>
+            <div id="auth-container" class="waiting-auth">
+                <a href="auth.html" class="nav-link btn-auth">Sign Up / Login</a>
+            </div>
+            <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+        </div>
+        <div class="hamburger"><span></span><span></span><span></span></div>
+    </div>
+</nav>
+<script type="module" src="auth-status.js"></script>
+    
+    <main class="provider-profile-page">
+        <div class="container">
+            <div class="profile-header">
+                 <div class="profile-avatar">
+                    <img src="lethabo.jpg" alt="Provider Avatar">
+                </div>
+                <div class="profile-info">
+                    <h1>Lethabo Phoshoko <span class="verified-badge-profile"><i class="fas fa-check"></i> Verified</span></h1>
+                    <p class="profile-service-title">Tailor, Photographer & Event Organiser</p>
+                    <div class="provider-rating">
+                        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                        <span class="rating-text">4.9 (127 reviews)</span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <a href="chat.html" class="btn-primary"><i class="fas fa-comment-dots" id="internal-send-message"></i> Send Message</a>
+                    <button class="btn-secondary" id="show-contact-btn"><i class="fas fa-phone"></i> Show Contact</button>
+                </div>
+            </div>
+
+            <div class="provider-details-layout">
+                <div class="provider-main-content">
+                    <div class="profile-section">
+                        <h2>About Me</h2>
+                        <p>Dress to impress while supporting your township's fashion scene.</p>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h2><i class="fas fa-tags"></i> Skills & Specialties</h2>
+                        <div class="skills-tags-container">
+                            <span class="skill-tag">Custom Suits</span>
+                            <span class="skill-tag">Dress Making</span>
+                            <span class="skill-tag">Traditional Attire</span>
+                            <span class="skill-tag">Alterations</span>
+                            <span class="skill-tag">Event Photography</span>
+                            <span class="skill-tag">Event Organising</span>
+                        </div>
+                    </div>
+                    
+                     <div class="profile-section">
+                        <h2>My Work</h2>
+                        <div class="gallery-grid">
+                            <img src="fashion.jpg" alt="Gallery image of plumbing work">
+                             <img src="peer.jpg" alt="Gallery image of a fixed pipe">
+                              <img src="suit.jpg" alt="Gallery image of bathroom installation">
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h2>Reviews (127)</h2>
+                        <div class="review-list">
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="review-author">Lerato M.</span>
+                                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                </div>
+                                <p>"My shirt is great, I though I had to buy a new one but he could fix it for me, dankie brother🙏"</p>
+                            </div>
+                             <div class="review-card">
+                                <div class="review-header">
+                                    <span class="review-author">Bongani Z.</span>
+                                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                </div>
+                                <p>"My outfit for my dad's 50 birthday party fit well, you can trust this man to tailor it right💯"</p>
+                            </div>
+                        </div>
+                         <button class="btn-secondary">Leave a Review</button>
+                    </div>
+                </div>
+                
+                <div class="provider-sidebar-details">
+                    <div id="contact-details" class="profile-section contact-details-hidden">
+                        <h4>Contact Lethabo</h4>
+                        <ul>
+                            <li>
+                                <i class="fab fa-whatsapp"></i>
+                                <a href="https://wa.me/27615551212" target="_blank">+27 61 555 1212</a>
+                            </li>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:lethabo.designs@kasi-hustle.co.za">lethabo.designs@kasi-hustle.co.za</a>
+                            </li>
+                            <li>
+                                <i class="fab fa-instagram"></i>
+                                <a href="https://instagram.com/lethabo_creates" target="_blank">@lethabo_creates</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="profile-section service-list-card">
+                         <h3>Services Offered</h3>
+                         <ul>
+                             <li><span>Full Suits</span><strong>From R800</strong></li>
+                             <li><span>Bubble Dresses</span><strong>From R1200</strong></li>
+                             <li><span>Traditional Shirts</span><strong>From R400</strong></li>
+                             <li><span>Shoes</span><strong>R250</strong></li>
+                         </ul>
+                         <a href="chat.html" class="btn-primary full-width">Request a Quote</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+     <footer class="footer">
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 Kasi Hustle. All rights reserved.</p></div></div>
+    </footer>
+    
+    <script src="theme.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const showContactBtn = document.getElementById('show-contact-btn');
+        const contactDetails = document.getElementById('contact-details');
+
+        if (showContactBtn && contactDetails) {
+            showContactBtn.addEventListener('click', () => {
+                // Toggle visibility classes
+                contactDetails.classList.toggle('contact-details-visible');
+                contactDetails.classList.toggle('contact-details-hidden');
+                
+                // Check if now visible and update button text
+                if (contactDetails.classList.contains('contact-details-visible')) {
+                    showContactBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Contact';
+                } else {
+                    showContactBtn.innerHTML = '<i class="fas fa-phone"></i> Show Contact';
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>
