@@ -66,33 +66,6 @@
         import { auth, db } from './firebase-config.js';
 
         // --- REDIRECTION LOGIC (Now simplified for 2 roles) ---
-        async function redirectToProfile(userId) {
-            const userDocRef = doc(db, "users", userId);
-            const userDocSnap = await getDoc(userDocRef);
-            let role = 'Personal'; // Default to Personal
-            let redirectUrl = 'myprofile.html';
-
-            if (userDocSnap.exists()) {
-                role = userDocSnap.data().role || 'Personal';
-            } else {
-                 console.warn("[AUTH] User document not found in Firestore during redirect check. Defaulting to Personal.");
-            }
-
-            // Save role locally for auth-status.js navigation
-            localStorage.setItem('userRole', role);
-
-            // UPDATED: Simplified redirection logic
-            if (role === 'Service Provider') {
-                redirectUrl = 'business-profile.html'; // Service Providers now go here
-            } else { // Handles 'Personal' or any unexpected/missing role
-                redirectUrl = 'myprofile.html';
-            }
-
-            console.log(`[AUTH] User Role Detected: ${role}`);
-            console.log(`[AUTH] Redirecting to: ${redirectUrl}`);
-
-            window.location.href = redirectUrl;
-        }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
