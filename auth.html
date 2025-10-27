@@ -52,6 +52,19 @@
         .btn-role.selected i {
             color: #fff;
         }
+        
+        /* NEW: Style for auth error messages */
+        .auth-message {
+            display: none; 
+            color: var(--primary-color); 
+            background-color: var(--surface-color); 
+            border: 1px solid var(--border-color); 
+            padding: 12px; 
+            border-radius: var(--border-radius); 
+            margin-bottom: 15px; 
+            text-align: center;
+            font-weight: 500;
+        }
 
         /* Responsive adjustments */
         @media (max-width: 400px) {
@@ -60,22 +73,7 @@
             }
         }
     </style>
-    <script type="module">
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-        import { auth, db } from './firebase-config.js';
-
-        // --- REDIRECTION LOGIC (Now simplified for 2 roles) ---
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // If user is already logged in, redirect them based on role
-                redirectToProfile(user.uid);
-            }
-            // If no user, stay on auth page
-        });
-    </script>
-</head>
+    </head>
 <body class="auth-body">
 
     <div class="auth-container">
@@ -83,8 +81,10 @@
             <button id="show-login" class="active">Login</button>
             <button id="show-signup">Sign Up</button>
         </div>
+        
+        <!-- NEW: Message div for errors -->
+        <div id="auth-message" class="auth-message"></div>
 
-        <!-- Social Auth (Google Sign-in) -->
         <div class="social-auth" id="social-auth">
             <button id="google-signin-btn" class="btn-google">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
@@ -94,10 +94,10 @@
 
         <div class="divider"><span>OR</span></div>
 
-        <!-- Login Form -->
         <div id="login-form" class="auth-form">
             <h2>Welcome Back</h2>
-            <form>
+            <!-- Updated form with ID -->
+            <form id="login-form-element">
                 <div class="input-group">
                     <label for="login-email">Email</label>
                     <input type="email" id="login-email" required>
@@ -106,35 +106,28 @@
                     <label for="login-password">Password</label>
                     <input type="password" id="login-password" required>
                 </div>
-                <button type="submit" class="btn-primary">Login</button>
+                <button type="submit" class="btn-primary" id="login-submit-btn">Login</button>
                 <p class="form-switch-text">Don't have an account? <a href="#" id="switch-to-signup">Sign up</a></p>
             </form>
         </div>
 
-        <!-- Signup Form -->
         <div id="signup-form" class="auth-form" style="display: none;">
             <h2>Create Account</h2>
 
-            <!-- UPDATED: Account Type Selection (Now 2 Roles) -->
             <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 500;">Select Account Type:</label>
             <div class="role-selector" id="role-selector">
                 <button type="button" class="btn-role selected" data-role="Personal" id="role-personal">
                     <i class="fas fa-user"></i>
                     <span>Personal</span>
                 </button>
-                <!-- RENAMED: Was Business, now Service Provider -->
                 <button type="button" class="btn-role" data-role="Service Provider" id="role-provider">
-                    <i class="fas fa-tools"></i> <!-- CHANGED ICON -->
-                    <span>Service Provider</span>
+                    <i class="fas fa-tools"></i> <span>Service Provider</span>
                 </button>
-                <!-- REMOVED: Original Service Provider button -->
-            </div>
-            <!-- END UPDATED: Account Type Selection -->
-
-            <form>
+                </div>
+            <!-- Updated form with ID -->
+            <form id="signup-form-element">
                  <div class="input-group">
-                    <label for="signup-name" id="name-label">Full Name</label> <!-- Label text will be updated by JS -->
-                    <input type="text" id="signup-name" required>
+                    <label for="signup-name" id="name-label">Full Name</label> <input type="text" id="signup-name" required>
                 </div>
                 <div class="input-group">
                     <label for="signup-email">Email</label>
@@ -148,7 +141,7 @@
                     <label for="signup-confirm-password">Confirm Password</label>
                     <input type="password" id="signup-confirm-password" required>
                 </div>
-                <button type="submit" class="btn-primary">Create Account</button>
+                <button type="submit" class="btn-primary" id="signup-submit-btn">Create Account</button>
                  <p class="form-switch-text">Already have an account? <a href="#" id="switch-to-login">Login</a></p>
             </form>
         </div>
@@ -157,34 +150,26 @@
         </div>
     </div>
 
-    <script type="module">
-    import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-    import { setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-    import { auth, db } from './firebase-config.js';
-
-    // --- RE-IMPORT REDIRECT FUNCTION (defined in head) ---
-    // Assuming redirectToProfile is globally available from the script in <head>
-    // If not, it needs to be redefined here or passed properly.
-    // For simplicity, we assume it's available.
-
-    // Elements
+    <!-- This script handles the visual toggling of forms -->
+    <script>
+    // --- TAB/FORM TOGGLING ELEMENTS ---
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     const showLoginBtn = document.getElementById('show-login');
     const showSignupBtn = document.getElementById('show-signup');
     const switchToSignupLink = document.getElementById('switch-to-signup');
     const switchToLoginLink = document.getElementById('switch-to-login');
-    const socialAuthDiv = document.getElementById('social-auth');
 
-    // Role selection elements
+    // --- ROLE SELECTION ELEMENTS ---
     const roleSelector = document.getElementById('role-selector');
     const roleButtons = roleSelector.querySelectorAll('.btn-role');
     const nameLabel = document.getElementById('name-label');
+    const socialAuthDiv = document.getElementById('social-auth');
 
     // Default to Personal role
     let selectedRole = 'Personal';
 
-    // --- Form Toggling ---
+    // --- Form Toggling Logic ---
     function showLogin() {
         loginForm.style.display = 'block';
         signupForm.style.display = 'none';
@@ -204,30 +189,22 @@
     showSignupBtn.addEventListener('click', showSignup);
     switchToSignupLink.addEventListener('click', (e) => { e.preventDefault(); showSignup(); });
 
-    // --- Role Selection Logic (UPDATED for 2 roles) ---
+
+    // --- UPDATED: ROLE SELECTION LOGIC ---
     function updateRoleSelection(role) {
         selectedRole = role; // Update the global variable
-        roleButtons.forEach(btn => btn.classList.remove('selected'));
-
-        // Find the button with the matching data-role and select it
-        const targetButton = document.querySelector(`.btn-role[data-role="${role}"]`);
-        if (targetButton) {
-            targetButton.classList.add('selected');
+        roleButtons.forEach(btn => {
+            if (btn.dataset.role === role) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
+        // Update name label
+        if (role === 'Service Provider') {
+            nameLabel.textContent = 'Business Name';
         } else {
-             console.warn(`Button for role "${role}" not found.`);
-             // Fallback to selecting the first button if the target isn't found
-             roleButtons[0]?.classList.add('selected');
-             selectedRole = roleButtons[0]?.dataset.role || 'Personal';
-        }
-
-
-        // Update Label and Google Button visibility
-        if (role === 'Service Provider') { // Check for the new role name
-            nameLabel.textContent = 'Full Name / Business Name'; // Adjusted label
-            socialAuthDiv.style.display = 'none'; // Hide Google button for Service Provider
-        } else { // Handles 'Personal'
             nameLabel.textContent = 'Full Name';
-            socialAuthDiv.style.display = 'block'; // Show Google button for Personal
         }
     }
 
@@ -237,118 +214,223 @@
         });
     });
 
-    // --- Google Sign-In (Only for Personal role now) ---
-    const googleSignInBtn = document.getElementById('google-signin-btn');
-    googleSignInBtn.addEventListener('click', async () => {
-        // Ensure only Personal role uses Google Sign-in effectively
-        if (selectedRole !== 'Personal') {
-             console.log("Google Sign-In is recommended for Personal accounts.");
-             // Optionally visually disable or hide the button if role is not Personal
-             return; // Or proceed but default role to Personal
-        }
-
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-
-        try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const userDocRef = doc(db, "users", user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-
-            let finalRole = 'Personal'; // Default for Google Sign-In
-
-            if (!userDocSnap.exists()) {
-                // First time Google Sign-In: save as Personal
-                await setDoc(userDocRef, {
-                    fullName: user.displayName,
-                    email: user.email,
-                    role: 'Personal', // Force Personal for Google Sign-In
-                });
-            } else {
-                 // Returning user: maintain their existing role unless it's Business (no longer exists)
-                 const existingRole = userDocSnap.data().role;
-                 finalRole = (existingRole === 'Business') ? 'Personal' : (existingRole || 'Personal'); // Map old Business role to Personal
-            }
-
-            // Update local storage and redirect
-            localStorage.setItem('userRole', finalRole);
-            redirectToProfile(user.uid); // Use the global redirect function
-
-        } catch (error) {
-            console.error("Error during Google sign-in:", error);
-            console.log(`Google Sign-In Error: ${error.message}`);
-        }
-    });
-
-    // --- Email/Password Sign Up (Uses selectedRole) ---
-    const signupFormElement = signupForm.querySelector('form');
-    signupFormElement.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Prevent default form submission
-        const name = document.getElementById('signup-name').value;
-        const email = document.getElementById('signup-email').value;
-        const password = document.getElementById('signup-password').value;
-        const confirmPassword = document.getElementById('signup-confirm-password').value;
-
-        if (password !== confirmPassword) {
-            console.log("Passwords do not match!");
-            // Add user feedback here later (e.g., display error message)
-            return;
-        }
-
-        // --- Debugging Log ---
-        console.log(`[AUTH SIGNUP] Role selected just before saving: ${selectedRole}`);
-        // ---------------------
-
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            // Update Firebase Auth profile displayName
-            await updateProfile(user, { displayName: name });
-
-            // Create user document in Firestore with the selected role
-            await setDoc(doc(db, "users", user.uid), {
-                fullName: name, // Store the name (could be personal or business name based on label)
-                email: email,
-                role: selectedRole // Save the currently selected role ('Personal' or 'Service Provider')
-            });
-
-            // Update local storage and redirect
-            localStorage.setItem('userRole', selectedRole);
-            redirectToProfile(user.uid); // Use the global redirect function
-
-        } catch (error) {
-            console.error("Error signing up:", error);
-            console.log(`Error signing up: ${error.message}`);
-             // Add user feedback here later
-        }
-    });
-
-    // --- Email/Password Login ---
-    const loginFormElement = loginForm.querySelector('form');
-    loginFormElement.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Prevent default form submission
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            // Redirect will be handled by onAuthStateChanged OR the specific redirect function
-            // We just need to ensure the user exists, then call redirectToProfile
-            redirectToProfile(userCredential.user.uid); // Use the global redirect function
-
-        } catch (error) {
-            console.error("Error signing in:", error);
-            console.log(`Error signing in: ${error.message}`);
-             // Add user feedback here later
-        }
-    });
-
     // Initial role setup on load (defaults to Personal)
     updateRoleSelection(selectedRole);
+    </script>
+    
+    <!-- NEW: This script handles all Firebase Authentication -->
+    <script type="module">
+        // Import Firebase services
+        import { 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword,
+            GoogleAuthProvider,
+            signInWithPopup,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { 
+            doc, 
+            setDoc, 
+            getDoc 
+        } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
+
+        // --- Get Elements ---
+        const loginFormElement = document.getElementById('login-form-element');
+        const loginEmailInput = document.getElementById('login-email');
+        const loginPasswordInput = document.getElementById('login-password');
+        const loginSubmitBtn = document.getElementById('login-submit-btn');
+
+        const signupFormElement = document.getElementById('signup-form-element');
+        const signupNameInput = document.getElementById('signup-name');
+        const signupEmailInput = document.getElementById('signup-email');
+        const signupPasswordInput = document.getElementById('signup-password');
+        const signupConfirmPasswordInput = document.getElementById('signup-confirm-password');
+        const signupSubmitBtn = document.getElementById('signup-submit-btn');
+
+        const googleSignInBtn = document.getElementById('google-signin-btn');
+        const authMessageDiv = document.getElementById('auth-message');
+        
+        let isRedirecting = false; // Prevent multiple redirects
+
+        // --- Utility to show messages ---
+        function showMessage(message, isError = true) {
+            authMessageDiv.textContent = message;
+            authMessageDiv.style.display = 'block';
+            authMessageDiv.style.color = isError ? 'var(--primary-color)' : 'var(--success-color)'; // Assuming you have a success color
+        }
+        function hideMessage() {
+            authMessageDiv.style.display = 'none';
+        }
+
+        // --- 1. SIGNUP LOGIC ---
+        signupFormElement.addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideMessage();
+            signupSubmitBtn.disabled = true;
+            signupSubmitBtn.textContent = 'Creating...';
+
+            const fullName = signupNameInput.value;
+            const email = signupEmailInput.value;
+            const password = signupPasswordInput.value;
+            const confirmPassword = signupConfirmPasswordInput.value;
+            // 'selectedRole' is available from the script above
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match.');
+                signupSubmitBtn.disabled = false;
+                signupSubmitBtn.textContent = 'Create Account';
+                return;
+            }
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // User created in Auth, now save to Firestore
+                    const user = userCredential.user;
+                    const userData = {
+                        uid: user.uid,
+                        email: user.email,
+                        fullName: fullName, // This is the Business Name or Full Name
+                        role: selectedRole,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Save to Firestore
+                    return setDoc(doc(db, "users", user.uid), userData);
+                })
+                .then(() => {
+                    // Success! No need to redirect here, onAuthStateChanged will handle it.
+                    console.log('User created and data saved to Firestore.');
+                    // The onAuthStateChanged listener will now fire and handle the redirect.
+                })
+                .catch((error) => {
+                    showMessage(getFriendlyAuthError(error.code));
+                })
+                .finally(() => {
+                    signupSubmitBtn.disabled = false;
+                    signupSubmitBtn.textContent = 'Create Account';
+                });
+        });
+
+        // --- 2. LOGIN LOGIC ---
+        loginFormElement.addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideMessage();
+            loginSubmitBtn.disabled = true;
+            loginSubmitBtn.textContent = 'Logging in...';
+
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Success! onAuthStateChanged will handle the redirect.
+                    console.log('User logged in.');
+                })
+                .catch((error) => {
+                    showMessage(getFriendlyAuthError(error.code));
+                })
+                .finally(() => {
+                    loginSubmitBtn.disabled = false;
+                    loginSubmitBtn.textContent = 'Login';
+                });
+        });
+
+        // --- 3. GOOGLE SIGN-IN LOGIC ---
+        googleSignInBtn.addEventListener('click', () => {
+            hideMessage();
+            const provider = new GoogleAuthProvider();
+
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // User signed in, now create/update their Firestore doc
+                    const user = result.user;
+                    // 'selectedRole' from the other script is used here to assign role on Google Sign-Up
+                    const userData = {
+                        uid: user.uid,
+                        email: user.email,
+                        fullName: user.displayName, // Google provides this
+                        role: selectedRole, // Assign role chosen on UI
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Use setDoc with { merge: true } to create or update
+                    // This won't overwrite data if they already exist
+                    return setDoc(doc(db, "users", user.uid), userData, { merge: true });
+                })
+                .then(() => {
+                    // Success! onAuthStateChanged will handle the redirect.
+                    console.log('Google user saved to Firestore.');
+                })
+                .catch((error) => {
+                    showMessage(getFriendlyAuthError(error.code));
+                });
+        });
+
+        // --- 4. AUTH STATE OBSERVER (Handles All Redirects) ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user && !isRedirecting) {
+                isRedirecting = true; // Set flag
+                console.log('Auth state changed, user logged in:', user.uid);
+                
+                // User is logged in, check their role in Firestore
+                const userDocRef = doc(db, "users", user.uid);
+                try {
+                    const userDocSnap = await getDoc(userDocRef);
+
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        
+                        // *** THIS IS THE REDIRECT LOGIC YOU REQUESTED ***
+                        if (userData.role === 'Service Provider') {
+                            window.location.href = 'business-profile.html';
+                        } else {
+                            // Default redirect for "Personal" or other roles
+                            window.location.href = 'index.html'; 
+                        }
+                    } else {
+                        // This might happen if Firestore doc creation failed or is slow
+                        // We'll log an error and send to index.
+                        console.error('User is logged in, but no Firestore doc found. This might be a new Google Sign-In.');
+                        // For Google Sign-In, the doc might still be writing.
+                        // We'll wait a tiny bit, but usually the redirect logic handles this.
+                        // For safety, redirect to index.
+                        window.location.href = 'index.html';
+                    }
+                } catch (error) {
+                    console.error("Error fetching user document:", error);
+                    showMessage("Could not verify user role. Redirecting to home.");
+                    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                }
+            } else if (!user) {
+                // User is logged out
+                console.log('User is logged out.');
+                isRedirecting = false; // Reset flag
+            }
+        });
+
+        // --- 5. Friendly Error Message Helper ---
+        function getFriendlyAuthError(code) {
+            switch (code) {
+                case 'auth/invalid-email':
+                    return 'Please enter a valid email address.';
+                case 'auth/user-disabled':
+                    return 'This account has been disabled.';
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                case 'auth/invalid-credential':
+                    return 'Invalid email or password. Please try again.';
+                case 'auth/email-already-in-use':
+                    return 'An account with this email already exists.';
+                case 'auth/weak-password':
+                    return 'Password is too weak. Please use at least 6 characters.';
+                case 'auth/popup-closed-by-user':
+                    return 'Google Sign-In was cancelled.';
+                default:
+                    return 'An unknown error occurred. Please try again.';
+            }
+        }
 
     </script>
 </body>
 </html>
-

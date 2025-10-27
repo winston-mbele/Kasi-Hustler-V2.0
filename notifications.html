@@ -149,13 +149,16 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <!-- **** MODIFICATION: Updated nav-menu content **** -->
             <div class="nav-menu">
-                <a href="index.html" class="nav-link">Home</a>
-                <a href="all-services.html" class="nav-link">Find Services</a>
-                <div id="auth-container" class="waiting-auth">
-                    </div>
+                <a href="client-dashboard.html" class="nav-link" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </a>
+                <div id="auth-container" class="waiting-auth"></div>
                 <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
             </div>
+            <!-- **** END OF MODIFICATION **** -->
             <div class="hamburger"><span></span><span></span><span></span></div>
         </div>
     </nav>
@@ -237,7 +240,7 @@
     </footer>
 
     <script src="theme.js"></script>
-    <script type="module" src="auth-status.js"></script>
+    <script type(="module" src="auth-status.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const inboxTab = document.getElementById('inbox-tab');
