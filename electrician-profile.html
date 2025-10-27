@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sizwe Dlamini - Electrician - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="services.html" class="nav-link">Find Services</a>
+                <div id="auth-container" class="waiting-auth">
+                    <a href="auth.html" class="nav-link btn-auth">Sign Up / Login</a>
+                </div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+    <script type="module" src="auth-status.js"></script>
+
+    <main class="provider-profile-page">
+        <div class="container">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="https://images.pexels.com/photos/9242266/pexels-photo-9242266.jpeg" alt="Provider Avatar">
+                </div>
+                <div class="profile-info">
+                    <h1>Sizwe Dlamini <span class="verified-badge-profile"><i class="fas fa-check"></i> Verified</span></h1>
+                    <p class="profile-service-title">Residential & Industrial Electrical Services</p>
+                    <div class="provider-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-text">4.9 (112 reviews)</span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <a href="chat.html" class="btn-primary"><i class="fas fa-comment-dots"></i> Send Message</a>
+                    <button class="btn-secondary" id="show-contact-btn"><i class="fas fa-phone"></i> Show Contact</button>
+                </div>
+            </div>
+
+            <div class="provider-details-layout">
+                <div class="provider-main-content">
+                    <div class="profile-section">
+                        <h2>About Me</h2>
+                        <p>Certified electrician with 10 years of hands-on experience in residential and industrial installations. I specialize in electrical repairs, rewiring, and power backup systems. My goal is to ensure safety, efficiency, and reliability in every project I take on.</p>
+                    </div>
+
+                    <div class="profile-section">
+                        <h2><i class="fas fa-tags"></i> Skills & Specialties</h2>
+                        <div class="skills-tags-container">
+                            <span class="skill-tag">Wiring & Rewiring</span>
+                            <span class="skill-tag">Lighting Installation</span>
+                            <span class="skill-tag">Appliance Repair</span>
+                            <span class="skill-tag">Generator Installation</span>
+                            <span class="skill-tag">Power Backup Systems</span>
+                            <span class="skill-tag">Electrical Safety Inspections</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h2>My Work</h2>
+                        <div class="gallery-grid">
+                            <img src="https://ekasilights.co.za/media/a05978f058659d606f0e7974ffa24310.jpg" alt="Gallery image of electrical wiring">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtFiBr6QltBqKwzftoO5G89pLucxJzDs7JTA&s" alt="Gallery image of lighting installation">
+                            <img src="https://www.monimelectricians.co.za/wp-content/uploads/2022/09/d74be035-204e-4a16-a017-c9055450f692-900x600.jpg" alt="Gallery image of electrical panel work">
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h2>Reviews (112)</h2>
+                        <div class="review-list">
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="review-author">Karabo S.</span>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <p>"Sizwe was quick to respond and professional. Fixed my circuit breaker issue in no time!"</p>
+                            </div>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="review-author">Nokuthula P.</span>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                </div>
+                                <p>"Very knowledgeable and neat with his work. Installed my solar backup system perfectly."</p>
+                            </div>
+                        </div>
+                        <button class="btn-secondary">Leave a Review</button>
+                    </div>
+                </div>
+
+                <div class="provider-sidebar-details">
+                    <div id="contact-details" class="profile-section contact-details-hidden">
+                        <h4>Contact Lebo</h4>
+                        <ul>
+                            <li>
+                                <i class="fab fa-whatsapp"></i>
+                                <a href="https://wa.me/27723334455" target="_blank">+27 72 333 4455</a>
+                            </li>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:lebo.dlamini@kasi-hustle.co.za">sizwe.dlamini@kasi-hustle.co.za</a>
+                            </li>
+                            <li>
+                                <i class="fab fa-instagram"></i>
+                                <a href="https://instagram.com/sizwe_electrics" target="_blank">@sizwe_electrics</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="profile-section service-list-card">
+                        <h3>Services Offered</h3>
+                        <ul>
+                            <li><span>Electrical Fault Repairs</span><strong>From R400</strong></li>
+                            <li><span>Lighting Installation</span><strong>From R250</strong></li>
+                            <li><span>Wiring & Rewiring</span><strong>From R900</strong></li>

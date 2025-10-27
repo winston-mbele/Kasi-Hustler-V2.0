@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandla Makhathini - Gardener - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="services.html" class="nav-link">Find Services</a>
+                <div id="auth-container" class="waiting-auth">
+                    <a href="auth.html" class="nav-link btn-auth">Sign Up / Login</a>
+                </div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+    <script type="module" src="auth-status.js"></script>
+
+    <!-- Main Content -->
+    <main class="provider-profile-page">
+        <div class="container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="gardener.jpg" alt="Provider Avatar">
+                </div>
+                <div class="profile-info">
+                    <h1>Mandla Makhathini <span class="verified-badge-profile"><i class="fas fa-check"></i> Verified</span></h1>
+                    <p class="profile-service-title">Garden Care & Landscaping Expert</p>
+                    <div class="provider-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-text">4.8 (89 reviews)</span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <a href="chat.html" class="btn-primary"><i class="fas fa-comment-dots"></i> Send Message</a>
+                    <button class="btn-secondary" id="show-contact-btn"><i class="fas fa-phone"></i> Show Contact</button>
+                </div>
+            </div>
+
+            <!-- Layout -->
+            <div class="provider-details-layout">
+                <!-- Main -->
+                <div class="provider-main-content">
+                    <div class="profile-section">
+                        <h2>About Me</h2>
+                        <p>I’m Mandla, a passionate gardener with 8 years of experience transforming lawns and outdoor spaces. From garden maintenance to full landscaping projects, I bring life, color, and creativity to every yard. I believe a beautiful garden brings peace to any home.</p>
+                    </div>
+
+                    <div class="profile-section">
+                        <h2><i class="fas fa-leaf"></i> Skills & Specialties</h2>
+                        <div class="skills-tags-container">
+                            <span class="skill-tag">Lawn Mowing</span>
+                            <span class="skill-tag">Tree Trimming</span>
+                            <span class="skill-tag">Garden Design</span>
+                            <span class="skill-tag">Weed Control</span>
+                            <span class="skill-tag">Landscaping</span>
+                            <span class="skill-tag">Irrigation System Setup</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h2>My Work</h2>
+                        <div class="gallery-grid">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE4zXsZCcRGgJXyt2H-AECWsTGb8ryvvIgUw&s" alt="Beautiful lawn setup">
+                            <img src="https://i.ytimg.com/vi/goWlOS1KC3Y/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCgru0idhNOVKXiWw_XcrSI-_R3EQ" alt="Flower bed maintenance">
+                            <img src="https://www.lifeisagarden.co.za/wp-content/uploads/2022/09/Life_is_a_garden_Modern_rock_on_Botanical_boss_reduced_waterusage_Xeriscaping.png.jpg" alt="Landscaping project">
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h2>Reviews (89)</h2>
+                        <div class="review-list">
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="review-author">Thandi M.</span>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <p>"Mandla made my garden look amazing! The flower arrangement was perfect for my mom’s birthday weekend."</p>
+                            </div>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="review-author">Brian K.</span>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                </div>
+                                <p>"Excellent service and very friendly. My lawn looks brand new every week!"</p>
+                            </div>
+                        </div>
+                        <button class="btn-secondary">Leave a Review</button>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="provider-sidebar-details">
+                    <div id="contact-details" class="profile-section contact-details-hidden">
+                        <h4>Contact Sipho</h4>
+                        <ul>
+                            <li>
+                                <i class="fab fa-whatsapp"></i>
+                                <a href="https://wa.me/27713334422" target="_blank">+27 71 333 4422</a>
+                            </li>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:sipho.ndlovu@kasi-hustle.co.za">mandla.ndlovu@kasi-hustle.co.za</a>
+                            </li>
+                            <li>
+                                <i class="fab fa-instagram"></i>
+                                <a href="https://instagram.com/mandlas_gardens" target="_blank">@mandlas_gardens</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="profile-section service-list-card">
+                        <h3>Services Offered</h3>
+                        <ul>
+                            <li><span>Lawn Mowing</span><strong>From R150</strong></li>
+                            <li><span>Tree Trimming</span><strong>From R350</strong></li>
+                            <li><span>Garden Design & Landscaping</span><strong>From R1200</strong></li>
+                            <li><span>Weed Control & Maintenance</span><strong>From R200</strong></li>
+                        </ul>
+                        <a href="chat.html" class="btn-primary full-width">Request a Quote</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Kasi Hustle. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="theme.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const showContactBtn = document.getElementById('show-contact-btn');
+        const contactDetails = document.getElementById('contact-details');
+
+        if (showContactBtn && contactDetails) {
+            showContactBtn.addEventListener('click', () => {
+                contactDetails.classList.toggle('contact-details-visible');
+                contactDetails.classList.toggle('contact-details-hidden');
+                showContactBtn.innerHTML = contactDetails.classList.contains('contact-details-visible')
+                    ? '<i class="fas fa-eye-slash"></i> Hide Contact'
+                    : '<i class="fas fa-phone"></i> Show Contact';
+            });
+        }
+    });
+    </script>
+</body>
+</html>

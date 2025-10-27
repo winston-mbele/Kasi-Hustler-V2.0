@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jabu Msomi - Painter - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="services.html" class="nav-link">Find Services</a>
+                <div id="auth-container" class="waiting-auth">
+                    <a href="auth.html" class="nav-link btn-auth">Sign Up / Login</a>
+                </div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+    <script type="module" src="auth-status.js"></script>
+    
+    <main class="provider-profile-page">
+        <div class="container">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="https://images.pexels.com/photos/5691535/pexels-photo-5691535.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Painter">
+                </div>
+                <div class="profile-info">
+                    <h1>Jabu Msomi <span class="verified-badge-profile"><i class="fas fa-check"></i> Verified</span></h1>
+                    <p class="profile-service-title">Residential & Commercial Painting</p>
+                    <div class="provider-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-text">4.8 (94 reviews)</span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <a href="chat.html" class="btn-primary"><i class="fas fa-comment-dots"></i> Send Message</a>
+                    <button class="btn-secondary" id="show-contact-btn"><i class="fas fa-phone"></i> Show Contact</button>
+                </div>
+            </div>
+
+            <div class="provider-details-layout">
+                <div class="provider-main-content">
+                    <div class="profile-section">
+                        <h2>About Me</h2>
+                        <p>Professional painter with over 6 years of experience transforming homes and businesses with clean, high-quality finishes. I specialize in both interior and exterior painting, ensuring a smooth, lasting result every time.</p>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h2><i class="fas fa-tags"></i> Skills & Specialties</h2>
+                        <div class="skills-tags-container">
+                            <span class="skill-tag">Interior Painting</span>
+                            <span class="skill-tag">Exterior Painting</span>
+                            <span class="skill-tag">Wall Preparation</span>
+                            <span class="skill-tag">Waterproofing</span>
+                            <span class="skill-tag">Roof Coating</span>
+                            <span class="skill-tag">Custom Color Matching</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h2>My Work</h2>
+                        <div class="gallery-grid">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtzLcidfz7WIMLfXkz2YLGM8GCPM7890XGgfxmRZk7aEGRyFc7Yy_JkIKs1MPgWB0f74w&usqp=CAU" alt="Gallery image of painting work">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2Cz3tVbGWRGhOSRE3As85KbocWA9WV5hy9Q&s" alt="Gallery image of a painted home">
+                            <img src="https://scontent-jnb2-1.xx.fbcdn.net/v/t39.30808-6/561329938_1498241258565926_6250182415150746991_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeF1Yi6owShlqLGs8xg3hzjMeY0a0KVk-aB5jRrQpWT5oMxIAVi4OSrqfeIGJHVcsYB5myF9QCgWPj7NxCaAEKG6&_nc_ohc=5s2PhfvzTDgQ7kNvwGKLo-9&_nc_oc=AdmuJ99PUxN3Mgj7Y-s5H4zwUXd-Fhak1qt9ZgAW29_o9xEmbyNcPJRCZQsQK1zR2MM&_nc_zt=23&_nc_ht=scontent-jnb2-1.xx&_nc_gid=cEkUM7P0oCgw1QQaBJcDiQ&oh=00_AfcKY7dTY6JtJfuHYEtM7O_biOHZM5E85EvMj1jmWgaHcg&oe=69054F41" alt="Gallery image of interior painting">
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h2>Reviews (94)</h2>
+                        <div class="review-list">
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="review-author">Naledi R.</span>
+                                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                </div>
+                                <p>"Jabu did an incredible job repainting my house. Very neat, affordable, and professional. Highly recommend!"</p>
+                            </div>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="review-author">Kabelo M.</span>
+                                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                                </div>
+                                <p>"Excellent service! He helped me choose the right colors and finished ahead of schedule."</p>
+                            </div>
+                        </div>
+                        <button class="btn-secondary">Leave a Review</button>
+                    </div>
+                </div>
+                
+                <div class="provider-sidebar-details">
+                    <div id="contact-details" class="profile-section contact-details-hidden">
+                        <h4>Contact Thabo</h4>
+                        <ul>
+                            <li>
+                                <i class="fab fa-whatsapp"></i>
+                                <a href="https://wa.me/27729876543" target="_blank">+27 72 987 6543</a>
+                            </li>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:thabo.ndlovu@kasi-hustle.co.za">jabu.msomi@kasi-hustle.co.za</a>
+                            </li>
+                            <li>
+                                <i class="fab fa-instagram"></i>
+                                <a href="https://instagram.com/thabo_paintworks" target="_blank">@jabu_paintworks</a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="profile-section service-list-card">
+                        <h3>Services Offered</h3>
+                        <ul>
+                            <li><span>Interior Painting</span><strong>From R450/room</strong></li>
+                            <li><span>Exterior Painting</span><strong>From R1500</strong></li>
+                            <li><span>Roof Coating</span><strong>From R900</strong></li>
+                            <li><span>Wall Repairs & Prep</span><strong>From R300</strong></li>
+                        </ul>
+                        <a href="chat.html" class="btn-primary full-width">Request a Quote</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 Kasi Hustle. All rights reserved.</p></div></div>
+    </footer>
+    
+    <script src="theme.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const showContactBtn = document.getElementById('show-contact-btn');
+        const contactDetails = document.getElementById('contact-details');
+
+        if (showContactBtn && contactDetails) {
+            showContactBtn.addEventListener('click', () => {
+                contactDetails.classList.toggle('contact-details-visible');
+                contactDetails.classList.toggle('contact-details-hidden');
+                showContactBtn.innerHTML = contactDetails.classList.contains('contact-details-visible')
+                    ? '<i class="fas fa-eye-slash"></i> Hide Contact'
+                    : '<i class="fas fa-phone"></i> Show Contact';
+            });
+        }
+    });
+    </script>
+</body>
+</html>
